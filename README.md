@@ -88,7 +88,7 @@ const DEMO_MODE = false;
 In `projects.html`, update the GitHub links to point to your actual repositories.
 
 ### 3. Resume
-Resume is located at `assets/resume.docx`
+Resume is located at `assets/RyangreeneResumeCurrent.pdf`
 
 ### 4. Add Profile Photo
 Replace the emoji placeholder in `about.html` with an actual photo.
