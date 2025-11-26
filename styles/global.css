@@ -75,6 +75,106 @@
 }
 
 /* ============================================
+   DARK MODE THEME
+   ============================================ */
+[data-theme="dark"] {
+    --color-primary: #4da3ff;
+    --color-primary-dark: #3b8de6;
+    --color-primary-light: #6bb3ff;
+    --color-accent: #fbbf24;
+    --color-accent-light: #fcd34d;
+    
+    --color-bg: #111111;
+    --color-bg-alt: #1a1a1a;
+    --color-bg-card: #1a1a1a;
+    --color-text: #f5f5f5;
+    --color-text-muted: #bbbbbb;
+    --color-text-light: #888888;
+    --color-border: #333333;
+    --color-border-light: #2a2a2a;
+    
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(77, 163, 255, 0.2);
+}
+
+[data-theme="dark"] .navbar {
+    background: rgba(17, 17, 17, 0.9);
+    border-bottom-color: var(--color-border);
+}
+
+[data-theme="dark"] .navbar.scrolled {
+    background: rgba(17, 17, 17, 0.98);
+}
+
+[data-theme="dark"] .btn-primary {
+    background: var(--color-primary);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: var(--color-bg-card);
+    border-color: var(--color-border);
+}
+
+[data-theme="dark"] .footer {
+    background: #0a0a0a;
+}
+
+/* Theme transition */
+html {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body, .navbar, .card, .btn, .footer, .form-input {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    margin-left: var(--space-sm);
+}
+
+.theme-toggle:hover {
+    background: var(--color-bg-alt);
+    color: var(--color-text);
+    border-color: var(--color-primary);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+    display: none;
+}
+
+/* Show sun in dark mode, moon in light mode */
+[data-theme="dark"] .theme-toggle .icon-sun {
+    display: block;
+}
+
+[data-theme="light"] .theme-toggle .icon-moon,
+:root:not([data-theme]) .theme-toggle .icon-moon {
+    display: block;
+}
+
+/* ============================================
    CSS RESET & BASE STYLES
    ============================================ */
 *, *::before, *::after {
