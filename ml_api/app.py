@@ -3,7 +3,7 @@ Ryan Greene Portfolio - Housing Price Estimator API
 Flask REST API for ML-powered housing price predictions
 
 This API provides housing price estimates based on property features
-using a K-Nearest Neighbors regression model.
+using a K-Nearest Neighbors regression model with ZIP code filtering.
 """
 
 import os
@@ -19,6 +19,7 @@ try:
     ML_AVAILABLE = True
 except ImportError:
     ML_AVAILABLE = False
+    pd = None
     print("Warning: ML libraries not available. Using fallback estimation.")
 
 # ============================================
@@ -43,11 +44,14 @@ CORS(app, resources={
 })
 
 # ============================================
-# Model Loading
+# Data and Model Loading
 # ============================================
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'knn_model.pkl')
+DATA_PATH = os.path.join(os.path.dirname(__file__), 'housing_data.csv')
+
 model = None
+housing_df = None
 
 def load_model():
     """Load the trained KNN model from disk."""
@@ -69,19 +73,170 @@ def load_model():
         print(f"Model file not found at {MODEL_PATH}. Using fallback estimation.")
         return None
 
-# Try to load model on startup
+def load_housing_data():
+    """Load the housing dataset for ZIP code filtering."""
+    global housing_df
+    
+    if not ML_AVAILABLE or pd is None:
+        print("Pandas not available. ZIP filtering disabled.")
+        return None
+    
+    if os.path.exists(DATA_PATH):
+        try:
+            housing_df = pd.read_csv(DATA_PATH)
+            print(f"Housing data loaded: {len(housing_df)} records")
+            return housing_df
+        except Exception as e:
+            print(f"Error loading housing data: {e}")
+            return None
+    else:
+        print(f"Housing data not found at {DATA_PATH}. Using fallback estimation.")
+        return None
+
+# Try to load model and data on startup
 load_model()
+load_housing_data()
 
 # ============================================
-# Fallback Estimation (when model not available)
+# Property Type Constants
 # ============================================
 
-def fallback_estimate(sqft, beds, baths, age):
+# Valid single-family home property types (lowercase for comparison)
+SINGLE_FAMILY_TYPES = [
+    'single family',
+    'single-family',
+    'singlefamily',
+    'house',
+    'sfh',
+    'single family home',
+    'single-family home',
+    'detached',
+    'single family residential',
+    'residential'
+]
+
+# ============================================
+# ZIP Code Based Estimation
+# ============================================
+
+def filter_single_family(df):
     """
-    Generate a fallback estimate when the ML model is not available.
-    Uses a simple formula based on typical housing market factors.
+    Filter DataFrame to include only single-family homes.
     
     Args:
+        df: pandas DataFrame with property_type column
+    
+    Returns:
+        Filtered DataFrame with only single-family homes
+    """
+    if 'property_type' not in df.columns:
+        # If no property_type column, return as-is
+        return df
+    
+    # Clean and normalize property type
+    df = df.copy()
+    df['property_type_clean'] = df['property_type'].astype(str).str.lower().str.strip()
+    
+    # Filter to single-family homes only
+    filtered = df[df['property_type_clean'].isin(SINGLE_FAMILY_TYPES)]
+    
+    return filtered
+
+
+def estimate_by_zip(zip_code, sqft, beds, baths, age):
+    """
+    Estimate home price using ZIP code filtered data.
+    Only uses single-family homes (excludes condos, apartments, townhomes, etc.)
+    
+    Args:
+        zip_code: ZIP code to filter by
+        sqft: Square footage of the property
+        beds: Number of bedrooms
+        baths: Number of bathrooms
+        age: Age of the home in years
+    
+    Returns:
+        tuple: (estimate, method, error_message)
+    """
+    global housing_df
+    
+    if housing_df is None or not ML_AVAILABLE:
+        return None, None, "no_data"
+    
+    try:
+        # Step 1: Filter by ZIP code
+        zip_filtered_df = housing_df[housing_df['zip_code'] == zip_code].copy()
+        
+        # Check if any homes exist for this ZIP
+        if zip_filtered_df.empty:
+            return None, None, "no_homes_in_zip"
+        
+        # Step 2: Filter to single-family homes only
+        filtered_df = filter_single_family(zip_filtered_df)
+        
+        # Check if any single-family homes exist for this ZIP
+        if filtered_df.empty:
+            return None, None, "no_single_family_in_zip"
+        
+        # Step 3: Sort by price (optional, for consistency)
+        if 'price' in filtered_df.columns:
+            filtered_df = filtered_df.sort_values('price', ascending=True)
+        
+        # Step 4: Calculate price per sqft for filtered single-family homes
+        if 'price' in filtered_df.columns and 'sqft' in filtered_df.columns:
+            filtered_df['price_per_sqft'] = filtered_df['price'] / filtered_df['sqft']
+            
+            # Get average price per sqft for this ZIP (single-family only)
+            avg_price_per_sqft = filtered_df['price_per_sqft'].mean()
+            
+            # Base estimate from price per sqft
+            estimate = avg_price_per_sqft * sqft
+            
+            # Adjust for bedrooms (compare to ZIP average)
+            if 'beds' in filtered_df.columns:
+                avg_beds = filtered_df['beds'].mean()
+                bed_diff = beds - avg_beds
+                estimate += bed_diff * 15000  # $15k per bedroom difference
+            
+            # Adjust for bathrooms (compare to ZIP average)
+            if 'baths' in filtered_df.columns:
+                avg_baths = filtered_df['baths'].mean()
+                bath_diff = baths - avg_baths
+                estimate += bath_diff * 10000  # $10k per bathroom difference
+            
+            # Adjust for age (compare to ZIP average)
+            if 'age' in filtered_df.columns:
+                avg_age = filtered_df['age'].mean()
+                age_diff = age - avg_age
+                # Newer homes are worth more (-0.5% per year difference)
+                age_adjustment = 1 - (age_diff * 0.005)
+                age_adjustment = max(0.7, min(1.3, age_adjustment))  # Cap adjustment
+                estimate *= age_adjustment
+            
+            # Ensure reasonable bounds based on single-family homes in ZIP
+            min_price = filtered_df['price'].min() * 0.5
+            max_price = filtered_df['price'].max() * 1.5
+            estimate = max(min_price, min(max_price, estimate))
+            
+            return round(estimate, 2), 'zip_filtered_sfh', None
+        else:
+            return None, None, "missing_columns"
+            
+    except Exception as e:
+        print(f"ZIP estimation error: {e}")
+        return None, None, "estimation_error"
+
+# ============================================
+# Fallback Estimation (when data not available)
+# ============================================
+
+def fallback_estimate(zip_code, sqft, beds, baths, age):
+    """
+    Generate a fallback estimate when housing data is not available.
+    Uses ZIP code prefix to estimate regional pricing.
+    
+    Args:
+        zip_code: ZIP code (used for regional adjustment)
         sqft: Square footage of the property
         beds: Number of bedrooms
         baths: Number of bathrooms
@@ -90,8 +245,25 @@ def fallback_estimate(sqft, beds, baths, age):
     Returns:
         Estimated price (float)
     """
-    # Base price per square foot (national average approximation)
-    base_price_per_sqft = 200
+    # Regional price adjustment based on ZIP code first digit
+    # This is a rough approximation of regional cost differences
+    zip_prefix = int(str(zip_code)[0]) if zip_code else 5
+    
+    # Base price per sqft varies by region (rough national estimates)
+    regional_multipliers = {
+        0: 280,  # Northeast (MA, CT, etc.)
+        1: 250,  # Northeast (NY, NJ, PA)
+        2: 220,  # Mid-Atlantic (DC, VA, MD)
+        3: 180,  # Southeast (FL, GA)
+        4: 160,  # Midwest (OH, MI, IN)
+        5: 170,  # South (TX, LA)
+        6: 150,  # Central (KS, MO)
+        7: 160,  # South Central (TX, OK)
+        8: 200,  # Mountain (CO, AZ)
+        9: 350,  # West Coast (CA, WA, OR)
+    }
+    
+    base_price_per_sqft = regional_multipliers.get(zip_prefix, 200)
     
     # Calculate base estimate
     estimate = sqft * base_price_per_sqft
@@ -129,8 +301,10 @@ def index():
     """
     return jsonify({
         'status': 'API running',
-        'version': '1.0.0',
+        'version': '1.1.0',
         'model_loaded': model is not None,
+        'data_loaded': housing_df is not None,
+        'data_records': len(housing_df) if housing_df is not None else 0,
         'ml_available': ML_AVAILABLE,
         'endpoints': {
             'GET /': 'Health check (this endpoint)',
@@ -149,6 +323,7 @@ def health():
     return jsonify({
         'status': 'healthy',
         'model_status': 'loaded' if model else 'using fallback',
+        'data_status': 'loaded' if housing_df is not None else 'not available',
         'ml_libraries': 'available' if ML_AVAILABLE else 'not installed'
     })
 
@@ -156,9 +331,10 @@ def health():
 @app.route('/predict', methods=['POST'])
 def predict():
     """
-    Main prediction endpoint.
+    Main prediction endpoint with ZIP code filtering.
     
     Expects JSON body with:
+        - zip (required): ZIP code for filtering
         - sqft (required): Square footage of the property
         - beds (required): Number of bedrooms
         - baths (required): Number of bathrooms
@@ -166,8 +342,8 @@ def predict():
     
     Returns JSON with:
         - estimate: Predicted price
-        - confidence: Model confidence (if available)
-        - method: 'model' or 'fallback'
+        - method: 'zip_filtered', 'model', or 'fallback'
+        - input: Echo of input values
     """
     try:
         # Parse request data
@@ -176,7 +352,7 @@ def predict():
         if not data:
             return jsonify({
                 'error': 'No data provided',
-                'message': 'Please send JSON data with sqft, beds, baths, and age fields'
+                'message': 'Please send JSON data with zip, sqft, beds, baths, and age fields'
             }), 400
         
         # Extract and validate required fields
@@ -192,6 +368,12 @@ def predict():
         
         # Parse and validate numeric values
         try:
+            # ZIP code (optional but recommended)
+            zip_code = None
+            if 'zip' in data or 'zipcode' in data or 'zip_code' in data:
+                zip_raw = data.get('zip') or data.get('zipcode') or data.get('zip_code')
+                zip_code = int(str(zip_raw).strip()[:5])  # Take first 5 digits
+            
             sqft = float(data['sqft'])
             beds = int(data['beds'])
             baths = float(data['baths'])
@@ -227,9 +409,36 @@ def predict():
                 'message': 'Age must be between 0 and 500 years'
             }), 400
         
-        # Generate prediction
-        if model is not None:
-            # Use ML model
+        # Validate ZIP code if provided
+        if zip_code is not None and (zip_code < 501 or zip_code > 99950):
+            return jsonify({
+                'error': 'Invalid ZIP code',
+                'message': 'Please enter a valid 5-digit US ZIP code'
+            }), 400
+        
+        # Try ZIP-filtered estimation first
+        estimate = None
+        method = None
+        
+        if zip_code is not None and housing_df is not None:
+            estimate, method, error = estimate_by_zip(zip_code, sqft, beds, baths, age)
+            
+            if error == "no_homes_in_zip":
+                return jsonify({
+                    'error': 'No homes found for this ZIP code',
+                    'message': f'No housing data available for ZIP code {zip_code}. Try a nearby ZIP code.',
+                    'zip_code': zip_code
+                }), 400
+            
+            if error == "no_single_family_in_zip":
+                return jsonify({
+                    'error': 'No single-family home data found for this ZIP',
+                    'message': f'No single-family homes found in ZIP code {zip_code}. Only condos/apartments may be available in this area.',
+                    'zip_code': zip_code
+                }), 400
+        
+        # Fall back to model prediction if ZIP estimation failed
+        if estimate is None and model is not None:
             try:
                 features = np.array([[sqft, beds, baths, age]])
                 prediction = model.predict(features)[0]
@@ -237,11 +446,11 @@ def predict():
                 method = 'model'
             except Exception as e:
                 print(f"Model prediction error: {e}")
-                estimate = fallback_estimate(sqft, beds, baths, age)
-                method = 'fallback'
-        else:
-            # Use fallback estimation
-            estimate = fallback_estimate(sqft, beds, baths, age)
+                estimate = None
+        
+        # Final fallback to formula-based estimation
+        if estimate is None:
+            estimate = fallback_estimate(zip_code, sqft, beds, baths, age)
             method = 'fallback'
         
         # Return prediction result
@@ -249,6 +458,7 @@ def predict():
             'estimate': estimate,
             'method': method,
             'input': {
+                'zip_code': zip_code,
                 'sqft': sqft,
                 'beds': beds,
                 'baths': baths,
@@ -304,4 +514,3 @@ if __name__ == '__main__':
         port=port,
         debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     )
-

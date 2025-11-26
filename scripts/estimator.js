@@ -143,6 +143,7 @@
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                zip: data.zipcode,
                 sqft: data.sqft,
                 beds: data.beds,
                 baths: data.baths,
@@ -150,11 +151,12 @@
             })
         });
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
         const result = await response.json();
+        
+        // Check for errors from API
+        if (!response.ok) {
+            throw new Error(result.message || `API error: ${response.status}`);
+        }
         
         // Calculate range (±10% of estimate)
         const estimate = result.estimate;
