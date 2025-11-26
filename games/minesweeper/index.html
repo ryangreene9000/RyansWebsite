@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Play Minesweeper - A C++ game compiled to WebAssembly by Ryan Greene">
+    <meta name="description" content="Play Minesweeper - A classic game recreated by Ryan Greene">
     <title>Minesweeper | Ryan Greene</title>
     
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
@@ -77,6 +77,37 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            gap: 1.5rem;
+        }
+        
+        /* Difficulty Selector */
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .difficulty-btn {
+            padding: 0.5rem 1rem;
+            background: var(--color-bg-alt);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            color: var(--color-text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .difficulty-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary-light);
+        }
+        
+        .difficulty-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
         }
         
         /* Game Canvas Area */
@@ -86,14 +117,15 @@
             border-radius: 8px;
             padding: 4px;
             box-shadow: 
-                inset 2px 2px 0 #808080,
-                inset -2px -2px 0 #ffffff,
+                inset 2px 2px 0 #ffffff,
+                inset -2px -2px 0 #808080,
                 0 20px 60px rgba(0, 0, 0, 0.4);
         }
         
         #game-canvas {
             display: block;
             border: 2px solid #808080;
+            border-radius: 2px;
         }
         
         /* Loading State */
@@ -132,80 +164,13 @@
             font-size: 1rem;
         }
         
-        /* Demo Mode Notice */
+        /* Demo Notice (hidden by default now) */
         .demo-notice {
-            position: absolute;
-            inset: 0;
-            background: var(--color-bg-alt);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-        }
-        
-        .demo-notice.hidden {
             display: none;
         }
         
-        .demo-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-        
-        .demo-notice h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .demo-notice p {
-            color: var(--color-text-muted);
-            max-width: 400px;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .demo-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 32px);
-            gap: 1px;
-            background: #808080;
-            padding: 1px;
-            border-radius: 4px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .demo-cell {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .cell-hidden {
-            background: linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%);
-            box-shadow: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #808080;
-        }
-        
-        .cell-revealed {
-            background: #c0c0c0;
-        }
-        
-        .cell-1 { color: #0000ff; }
-        .cell-2 { color: #008000; }
-        .cell-3 { color: #ff0000; }
-        .cell-flag { color: #ff0000; }
-        .cell-mine { background: #ff0000; }
-        
         /* Controls Info */
         .controls-info {
-            margin-top: 2rem;
             display: flex;
             gap: 2rem;
             flex-wrap: wrap;
@@ -229,6 +194,20 @@
             font-size: 0.75rem;
         }
         
+        /* Game Stats */
+        .game-stats {
+            display: flex;
+            gap: 2rem;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
         /* Responsive */
         @media (max-width: 600px) {
             .game-header {
@@ -240,6 +219,16 @@
             .controls-info {
                 flex-direction: column;
                 align-items: center;
+            }
+            
+            .difficulty-selector {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .game-canvas-wrapper {
+                max-width: 100%;
+                overflow: auto;
             }
         }
     </style>
@@ -259,64 +248,21 @@
 
     <!-- Game Container -->
     <main class="game-container">
+        <!-- Difficulty Selector -->
+        <div class="difficulty-selector">
+            <button class="difficulty-btn" data-difficulty="easy">Easy (9×9)</button>
+            <button class="difficulty-btn active" data-difficulty="medium">Medium (16×16)</button>
+            <button class="difficulty-btn" data-difficulty="hard">Hard (24×16)</button>
+        </div>
+        
         <div class="game-canvas-wrapper" id="game-wrapper">
-            <!-- Canvas will be inserted here by the game -->
+            <!-- Canvas -->
             <canvas id="game-canvas" width="512" height="572"></canvas>
             
             <!-- Loading Overlay -->
             <div class="loading-overlay" id="loading-overlay">
                 <div class="loading-spinner"></div>
                 <p class="loading-text">Loading game...</p>
-            </div>
-            
-            <!-- Demo Mode Notice (shown when WASM not available) -->
-            <div class="demo-notice" id="demo-notice">
-                <div class="demo-icon">💣</div>
-                <h2>Minesweeper</h2>
-                <p>
-                    This game is built in C++ with SFML and compiled to WebAssembly. 
-                    The playable build will be available after compilation.
-                </p>
-                
-                <!-- Demo preview grid -->
-                <div class="demo-grid">
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-2">2</div>
-                    <div class="demo-cell cell-hidden"></div>
-                    <div class="demo-cell cell-hidden"></div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed"></div>
-                    <div class="demo-cell cell-revealed"></div>
-                    
-                    <div class="demo-cell cell-hidden cell-flag">🚩</div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-2">2</div>
-                    <div class="demo-cell cell-hidden"></div>
-                    <div class="demo-cell cell-hidden"></div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed"></div>
-                    <div class="demo-cell cell-revealed"></div>
-                    
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed cell-2">2</div>
-                    <div class="demo-cell cell-revealed cell-1">1</div>
-                    <div class="demo-cell cell-revealed"></div>
-                    <div class="demo-cell cell-revealed"></div>
-                </div>
-                
-                <a href="https://github.com/ryangreene9000" class="demo-btn" target="_blank" 
-                   style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; 
-                          background: var(--color-primary); color: white; text-decoration: none; 
-                          border-radius: 9999px; font-weight: 500; transition: transform 0.2s, box-shadow 0.2s;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                    View Source Code
-                </a>
             </div>
         </div>
         
@@ -332,60 +278,40 @@
             </div>
             <div class="control-item">
                 <span class="control-key">Middle Click</span>
-                <span>Chord (reveal neighbors)</span>
+                <span>Chord</span>
             </div>
             <div class="control-item">
                 <span class="control-key">R</span>
                 <span>Restart</span>
             </div>
+            <div class="control-item">
+                <span class="control-key">1/2/3</span>
+                <span>Change difficulty</span>
+            </div>
         </div>
+        
+        <!-- Mobile hint -->
+        <p style="color: var(--color-text-muted); font-size: 0.8rem; text-align: center;">
+            📱 On mobile: Tap to reveal, long-press to flag
+        </p>
     </main>
 
     <!-- Game Script -->
+    <script src="minesweeper.js"></script>
     <script>
-        // Check if the WASM file exists and load the game
-        (function() {
-            const loadingOverlay = document.getElementById('loading-overlay');
-            const demoNotice = document.getElementById('demo-notice');
-            const canvas = document.getElementById('game-canvas');
-            
-            // Try to load the WebAssembly module
-            async function loadGame() {
-                try {
-                    // Check if minesweeper.js exists
-                    const response = await fetch('minesweeper.js', { method: 'HEAD' });
-                    
-                    if (response.ok) {
-                        // Load the game module
-                        const script = document.createElement('script');
-                        script.src = 'minesweeper.js';
-                        script.onload = function() {
-                            // Hide loading, show canvas
-                            loadingOverlay.classList.add('hidden');
-                            canvas.style.display = 'block';
-                        };
-                        script.onerror = function() {
-                            showDemoMode();
-                        };
-                        document.body.appendChild(script);
-                    } else {
-                        showDemoMode();
-                    }
-                } catch (e) {
-                    showDemoMode();
+        // Handle difficulty button clicks
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active state
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Change game difficulty
+                if (window.game) {
+                    window.game.changeDifficulty(this.dataset.difficulty);
                 }
-            }
-            
-            function showDemoMode() {
-                loadingOverlay.classList.add('hidden');
-                demoNotice.classList.remove('hidden');
-                canvas.style.display = 'none';
-            }
-            
-            // Start loading
-            loadGame();
-        })();
+            });
+        });
     </script>
 </body>
 </html>
-

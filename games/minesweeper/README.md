@@ -1,53 +1,116 @@
-# Minesweeper — C++ / SFML / WebAssembly
+# Minesweeper — JavaScript Canvas Game
 
-A complete Minesweeper game built from scratch in modern C++ using SFML, with WebAssembly support for browser play.
+A complete Minesweeper game built in JavaScript using HTML5 Canvas, playable directly in the browser.
+
+## 🎮 Play Now
+
+Visit `/games/minesweeper/` on the website to play!
 
 ## Features
 
-- 🎮 Classic Minesweeper gameplay
-- 💣 Randomized board and mine generation
+- 💣 Classic Minesweeper gameplay
+- 🎲 Randomized board and mine generation
 - 🔢 Neighbor mine-count algorithm
 - 🌊 Recursive flood-fill reveal
 - 🚩 Flagging system
 - ✅ Win/Loss detection
 - ⏱️ Built-in timer
-- 📊 Multiple difficulty levels (Easy, Medium, Hard)
-- 🌐 WebAssembly build for browser play
+- 📊 Three difficulty levels (Easy, Medium, Hard)
+- 📱 Mobile-friendly (touch support)
 
 ## Game Controls
 
+### Desktop
 | Action | Control |
 |--------|---------|
 | Reveal tile | Left Click |
 | Flag/unflag tile | Right Click |
 | Chord (reveal neighbors) | Middle Click |
 | Restart game | Press R |
-| Quit | Press Escape |
+| Easy difficulty | Press 1 |
+| Medium difficulty | Press 2 |
+| Hard difficulty | Press 3 |
 
-## Building the Game
+### Mobile
+| Action | Control |
+|--------|---------|
+| Reveal tile | Tap |
+| Flag tile | Long press (hold > 0.5s) |
 
-### Prerequisites
+## Difficulty Levels
 
-#### For Native Build:
-- CMake 3.15+
-- C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
-- SFML 2.5+ development libraries
+| Level | Board Size | Mines |
+|-------|------------|-------|
+| Easy | 9 × 9 | 10 |
+| Medium | 16 × 16 | 40 |
+| Hard | 24 × 16 | 70 |
 
-#### For WebAssembly Build:
-- Emscripten SDK
-- CMake 3.15+
+## How to Play
 
-### Native Build (SFML)
+1. **Goal**: Reveal all tiles that don't contain mines
+2. **Numbers**: Each number shows how many mines are in the 8 adjacent tiles
+3. **Flagging**: Right-click to mark suspected mines with flags
+4. **Chording**: Middle-click on a number to reveal all unflagged neighbors (if correct number of flags are placed)
+5. **First click**: The first click is always safe (no mine will be there)
+
+## Technical Details
+
+### Files
+```
+games/minesweeper/
+├── index.html        # Game page with UI
+├── minesweeper.js    # Complete game logic
+├── README.md         # This file
+└── src/
+    └── main.cpp      # C++ reference implementation (SFML)
+```
+
+### Architecture
+
+The game is built with three main classes:
+
+1. **Tile**: Represents a single cell
+   - States: hidden, revealed, flagged
+   - Properties: hasMine, neighborMines
+
+2. **Board**: Manages the game state
+   - Mine generation with safe zone
+   - Neighbor counting algorithm
+   - Flood-fill reveal logic
+   - Win/loss detection
+
+3. **Game**: Handles rendering and input
+   - Canvas drawing
+   - Mouse/touch events
+   - Timer management
+   - Difficulty switching
+
+### Algorithms
+
+**Mine Generation**
+- Uses Fisher-Yates shuffle for random placement
+- Excludes a 3×3 safe zone around the first click
+- Ensures the first click never hits a mine
+
+**Flood Fill**
+- When revealing a tile with 0 neighbors, recursively reveals all adjacent tiles
+- Stops at numbered tiles (tiles adjacent to mines)
+
+**Chording**
+- Counts flags around a revealed number tile
+- If flag count matches the number, reveals all unflagged neighbors
+- Can trigger a loss if flags are incorrectly placed
+
+## C++ Reference Implementation
+
+The `/src/main.cpp` file contains a C++ implementation using SFML for desktop builds. To build:
 
 ```bash
-# Install SFML (Ubuntu/Debian)
-sudo apt install libsfml-dev
-
-# Install SFML (macOS)
-brew install sfml
+# Install SFML
+brew install sfml  # macOS
+sudo apt install libsfml-dev  # Ubuntu
 
 # Build
-cd games/minesweeper
 mkdir build && cd build
 cmake ..
 make
@@ -55,100 +118,6 @@ make
 # Run
 ./minesweeper
 ```
-
-### WebAssembly Build (Emscripten)
-
-```bash
-# Install Emscripten (if not installed)
-git clone https://github.com/emscripten-core/emsdk.git
-cd emsdk
-./emsdk install latest
-./emsdk activate latest
-source ./emsdk_env.sh
-
-# Build
-cd games/minesweeper
-mkdir build-wasm && cd build-wasm
-emcmake cmake ..
-emmake make
-
-# The output files will be:
-# - minesweeper.js
-# - minesweeper.wasm
-# - minesweeper.data (assets)
-```
-
-### Deploying the WebAssembly Build
-
-After building, copy the generated files to the game directory:
-
-```bash
-cp minesweeper.js minesweeper.wasm minesweeper.data ../
-```
-
-The game will automatically load when you visit `/games/minesweeper/` on the website.
-
-## Project Structure
-
-```
-games/minesweeper/
-├── src/
-│   └── main.cpp          # Main game source code
-├── assets/
-│   └── font.ttf          # Game font (add your own)
-├── CMakeLists.txt        # CMake build configuration
-├── index.html            # WebAssembly loader page
-├── minesweeper.js        # Generated WASM glue code (after build)
-├── minesweeper.wasm      # Generated WebAssembly binary (after build)
-└── README.md             # This file
-```
-
-## Game Architecture
-
-### Classes
-
-- **`Tile`**: Represents a single tile on the board
-  - States: Hidden, Revealed, Flagged
-  - Properties: hasMine, neighborMines
-
-- **`Board`**: Manages the game board
-  - Mine generation with safe zone around first click
-  - Neighbor counting algorithm
-  - Recursive flood-fill reveal
-  - Win/loss detection
-
-- **`Game`**: Main game loop and rendering
-  - SFML window management
-  - Input handling
-  - Timer system
-  - Rendering tiles, header, and numbers
-
-### Algorithms
-
-1. **Mine Generation**: Uses Fisher-Yates shuffle to randomly place mines, excluding a 3x3 safe zone around the first click.
-
-2. **Neighbor Counting**: For each non-mine tile, counts adjacent mines in all 8 directions.
-
-3. **Flood-Fill Reveal**: When revealing a tile with 0 neighbors, recursively reveals all adjacent tiles until reaching numbered tiles.
-
-4. **Chording**: When clicking a revealed number tile with the correct number of adjacent flags, reveals all unflagged neighbors.
-
-## Customization
-
-### Changing Difficulty
-
-Edit the difficulty settings in `src/main.cpp`:
-
-```cpp
-const Difficulty EASY = {9, 9, 10, "Easy"};      // 9x9, 10 mines
-const Difficulty MEDIUM = {16, 16, 40, "Medium"};  // 16x16, 40 mines
-const Difficulty HARD = {30, 16, 99, "Hard"};    // 30x16, 99 mines
-```
-
-### Adding Custom Assets
-
-1. Place a TrueType font file at `assets/font.ttf`
-2. The game will automatically use it for rendering numbers and text
 
 ## License
 
@@ -160,4 +129,3 @@ MIT License - Part of Ryan Greene's Portfolio
 - GitHub: [github.com/ryangreene9000](https://github.com/ryangreene9000)
 - LinkedIn: [linkedin.com/in/ryancgreene1](https://linkedin.com/in/ryancgreene1)
 - Website: [ryangreenedev.com](https://ryangreenedev.com)
-
