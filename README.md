@@ -87,8 +87,8 @@ const DEMO_MODE = false;
 ### 2. Update Project Links
 In `projects.html`, update the GitHub links to point to your actual repositories.
 
-### 3. Add Resume PDF
-Place your resume at `assets/Ryan_Greene_Resume.pdf`
+### 3. Resume
+Resume is located at `assets/resume.docx`
 
 ### 4. Add Profile Photo
 Replace the emoji placeholder in `about.html` with an actual photo.
