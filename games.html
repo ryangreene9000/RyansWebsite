@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Games by Ryan Greene - Play Minesweeper and other games built from scratch.">
+    <title>Games | Ryan Greene</title>
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="stylesheet" href="/styles/global.css">
+    
+    <style>
+        /* Games Page Specific Styles */
+        .games-hero {
+            padding: var(--space-4xl) 0 var(--space-2xl);
+            text-align: center;
+            background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .games-hero::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .games-hero h1 {
+            margin-bottom: var(--space-md);
+        }
+        
+        .games-hero p {
+            font-size: 1.125rem;
+            margin: 0 auto;
+        }
+        
+        .games-section {
+            padding: var(--space-3xl) 0;
+        }
+        
+        /* Featured Game Card */
+        .featured-game {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--color-border-light);
+            overflow: hidden;
+            margin-bottom: var(--space-3xl);
+            transition: var(--transition-base);
+        }
+        
+        .featured-game:hover {
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+        
+        .featured-game-inner {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+        
+        .featured-game-image {
+            aspect-ratio: 4 / 3;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .featured-game-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 255, 255, 0.02) 40px,
+                    rgba(255, 255, 255, 0.02) 41px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 255, 255, 0.02) 40px,
+                    rgba(255, 255, 255, 0.02) 41px
+                );
+        }
+        
+        .game-preview {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            width: 280px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .cell-hidden {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.2), inset -2px -2px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .cell-revealed {
+            background: #cbd5e0;
+            color: #2d3748;
+        }
+        
+        .cell-mine {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .cell-flag {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: #f6e05e;
+        }
+        
+        .cell-1 { color: #3182ce; }
+        .cell-2 { color: #38a169; }
+        .cell-3 { color: #e53e3e; }
+        
+        .featured-game-content {
+            padding: var(--space-2xl);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .featured-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 0.375rem 0.875rem;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-lg);
+            width: fit-content;
+        }
+        
+        .featured-game-title {
+            font-size: 2rem;
+            margin-bottom: var(--space-md);
+        }
+        
+        .featured-game-description {
+            font-size: 1.0625rem;
+            color: var(--color-text-muted);
+            line-height: 1.8;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .game-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .game-feature {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 0.9375rem;
+            color: var(--color-text-muted);
+        }
+        
+        .game-feature .icon {
+            color: #22c55e;
+        }
+        
+        .featured-game-actions {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        /* Game Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-xl);
+        }
+        
+        .game-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border-light);
+            overflow: hidden;
+            transition: var(--transition-base);
+        }
+        
+        .game-card:hover {
+            border-color: transparent;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        
+        .game-card-image {
+            aspect-ratio: 16 / 10;
+            background: linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-border-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-card-image .placeholder-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+        
+        .game-card-content {
+            padding: var(--space-lg);
+        }
+        
+        .game-card-status {
+            display: inline-flex;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .status-coming-soon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--color-accent);
+        }
+        
+        .status-in-development {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .game-card-title {
+            font-size: 1.125rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .game-card-description {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 1024px) {
+            .featured-game-inner {
+                grid-template-columns: 1fr;
+            }
+            
+            .featured-game-image {
+                aspect-ratio: 16 / 9;
+            }
+            
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .featured-game-actions {
+                flex-direction: column;
+            }
+            
+            .featured-game-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="navbar-logo">
+                <span class="logo-icon">RG</span>
+                <span>Ryan Greene</span>
+            </a>
+            
+            <ul class="navbar-nav" id="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/about.html" class="nav-link">About</a></li>
+                <li><a href="/projects.html" class="nav-link">Projects</a></li>
+                <li><a href="/games.html" class="nav-link active">Games</a></li>
+                <li><a href="/realestate.html" class="nav-link">Estimator</a></li>
+                <li><a href="/contact.html" class="nav-link nav-cta">Contact</a></li>
+            </ul>
+            
+            <button class="navbar-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero -->
+        <section class="games-hero">
+            <div class="container">
+                <h1>Games</h1>
+                <p>Playable games built from scratch. Click to play directly in your browser.</p>
+            </div>
+        </section>
+
+        <!-- Games Section -->
+        <section class="games-section">
+            <div class="container">
+                
+                <!-- Featured Game: Minesweeper -->
+                <article class="featured-game reveal">
+                    <div class="featured-game-inner">
+                        <div class="featured-game-image">
+                            <div class="game-preview">
+                                <!-- Row 1 -->
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-2">2</div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <!-- Row 2 -->
+                                <div class="game-cell cell-flag">🚩</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-2">2</div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <!-- Row 3 -->
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-2">2</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <!-- Row 4 -->
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-flag">🚩</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed"></div>
+                                <!-- Row 5 -->
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed"></div>
+                                <!-- Row 6 -->
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <div class="game-cell cell-revealed"></div>
+                                <!-- Row 7 -->
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-revealed cell-2">2</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-hidden"></div>
+                                <!-- Row 8 -->
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-flag">🚩</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-revealed cell-1">1</div>
+                                <div class="game-cell cell-hidden"></div>
+                                <div class="game-cell cell-hidden"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="featured-game-content">
+                            <span class="featured-badge">
+                                ⭐ Featured Game
+                            </span>
+                            
+                            <h2 class="featured-game-title">Minesweeper</h2>
+                            
+                            <p class="featured-game-description">
+                                A full Minesweeper game built from scratch in C++ using SFML. Features 
+                                randomized board generation, neighbor-count logic, recursive flood-fill 
+                                reveal, flagging system, and win/loss detection. Exported to WebAssembly 
+                                using Emscripten so you can play it directly in your browser.
+                            </p>
+                            
+                            <div class="game-features">
+                                <div class="game-feature">
+                                    <span class="icon">✓</span>
+                                    <span>Randomized Boards</span>
+                                </div>
+                                <div class="game-feature">
+                                    <span class="icon">✓</span>
+                                    <span>Flood-Fill Reveal</span>
+                                </div>
+                                <div class="game-feature">
+                                    <span class="icon">✓</span>
+                                    <span>Flagging System</span>
+                                </div>
+                                <div class="game-feature">
+                                    <span class="icon">✓</span>
+                                    <span>Win/Loss Detection</span>
+                                </div>
+                                <div class="game-feature">
+                                    <span class="icon">✓</span>
+                                    <span>Built-in Timer</span>
+                                </div>
+                                <div class="game-feature">
+                                    <span class="icon">✓</span>
+                                    <span>Multiple Difficulties</span>
+                                </div>
+                            </div>
+                            
+                            <div class="featured-game-actions">
+                                <a href="/games/minesweeper/" class="btn btn-primary btn-lg">
+                                    🎮 Play Now
+                                </a>
+                                <a href="https://github.com/ryangreene9000" class="btn btn-secondary btn-lg" target="_blank">
+                                    View Source
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- More Games Coming Soon -->
+                <div class="section-header">
+                    <h2>More Games</h2>
+                    <p>Additional games in development. Check back soon!</p>
+                </div>
+                
+                <div class="games-grid">
+                    <!-- Placeholder Game 1 -->
+                    <article class="game-card reveal">
+                        <div class="game-card-image">
+                            <span class="placeholder-icon">🐍</span>
+                        </div>
+                        <div class="game-card-content">
+                            <span class="game-card-status status-coming-soon">Coming Soon</span>
+                            <h3 class="game-card-title">Snake</h3>
+                            <p class="game-card-description">
+                                Classic snake game with modern graphics and smooth controls. 
+                                Collect food, grow longer, and don't hit the walls!
+                            </p>
+                        </div>
+                    </article>
+                    
+                    <!-- Placeholder Game 2 -->
+                    <article class="game-card reveal">
+                        <div class="game-card-image">
+                            <span class="placeholder-icon">🧱</span>
+                        </div>
+                        <div class="game-card-content">
+                            <span class="game-card-status status-in-development">In Development</span>
+                            <h3 class="game-card-title">Tetris</h3>
+                            <p class="game-card-description">
+                                The iconic puzzle game. Rotate and place falling blocks to 
+                                complete lines and score points.
+                            </p>
+                        </div>
+                    </article>
+                    
+                    <!-- Placeholder Game 3 -->
+                    <article class="game-card reveal">
+                        <div class="game-card-image">
+                            <span class="placeholder-icon">🎯</span>
+                        </div>
+                        <div class="game-card-content">
+                            <span class="game-card-status status-coming-soon">Coming Soon</span>
+                            <h3 class="game-card-title">2048</h3>
+                            <p class="game-card-description">
+                                Slide numbered tiles on a grid to combine them and reach the 
+                                2048 tile. Simple to learn, hard to master.
+                            </p>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <h3>Ryan Greene</h3>
+                    <p>Computer Engineering student passionate about building scalable systems and intelligent automation.</p>
+                    <div class="footer-social">
+                        <a href="https://github.com/ryangreene9000" target="_blank" rel="noopener" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ryancgreene1" target="_blank" rel="noopener" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="mailto:Ryangreene2091@gmail.com" aria-label="Email">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about.html">About</a></li>
+                        <li><a href="/projects.html">Projects</a></li>
+                        <li><a href="/games.html">Games</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/projects.html#ai-contract">AI Contract Detector</a></li>
+                        <li><a href="/games/minesweeper/">Minesweeper</a></li>
+                        <li><a href="/realestate.html">ML Estimator</a></li>
+                        <li><a href="/projects.html#mips">MIPS Processor</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:Ryangreene2091@gmail.com">Email</a></li>
+                        <li><a href="https://www.linkedin.com/in/ryancgreene1" target="_blank">LinkedIn</a></li>
+                        <li><a href="https://github.com/ryangreene9000" target="_blank">GitHub</a></li>
+                        <li><a href="tel:650-454-4727">Phone</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 Ryan Greene — All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/scripts/main.js"></script>
+</body>
+</html>
+

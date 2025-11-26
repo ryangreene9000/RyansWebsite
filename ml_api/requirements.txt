@@ -1,0 +1,21 @@
+# Flask ML API Requirements
+# Ryan Greene Portfolio - Housing Price Estimator
+
+# Web Framework
+Flask==2.2.5
+Werkzeug==2.2.3
+
+# CORS support
+flask-cors==4.0.0
+
+# WSGI Server for production
+gunicorn==21.2.0
+
+# Data processing
+pandas==2.0.3
+numpy==1.24.3
+
+# Machine Learning
+scikit-learn==1.3.0
+joblib==1.3.1
+

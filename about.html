@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="About Ryan Greene - Computer Engineering Student at Penn State, Software/Data Engineer with experience at FINRA.">
+    <title>About | Ryan Greene</title>
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="stylesheet" href="/styles/global.css">
+    
+    <style>
+        /* About Page Specific Styles */
+        .about-hero {
+            padding: var(--space-4xl) 0 var(--space-2xl);
+            background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
+        }
+        
+        .about-hero-inner {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--space-3xl);
+            align-items: start;
+        }
+        
+        .about-photo {
+            position: sticky;
+            top: calc(var(--navbar-height) + var(--space-xl));
+        }
+        
+        .photo-wrapper {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            padding: 4px;
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .photo-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: calc(var(--radius-xl) - 2px);
+            background: var(--color-bg-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--color-text-muted);
+        }
+        
+        .about-intro h1 {
+            margin-bottom: var(--space-md);
+        }
+        
+        .about-intro .subtitle {
+            font-size: 1.25rem;
+            color: var(--color-primary);
+            font-weight: 500;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .about-intro .bio {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+            color: var(--color-text-muted);
+        }
+        
+        .about-intro .bio p {
+            margin-bottom: var(--space-lg);
+            max-width: none;
+        }
+        
+        .about-section {
+            padding: var(--space-3xl) 0;
+        }
+        
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-xl);
+        }
+        
+        .info-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border-light);
+            padding: var(--space-xl);
+            transition: var(--transition-base);
+        }
+        
+        .info-card:hover {
+            border-color: var(--color-border);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .info-card h3 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            font-size: 1.125rem;
+        }
+        
+        .info-card h3 .icon {
+            font-size: 1.25rem;
+        }
+        
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+        
+        .skill-tag {
+            padding: 0.5rem 1rem;
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            border: 1px solid var(--color-border-light);
+            transition: var(--transition-fast);
+        }
+        
+        .skill-tag:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.05);
+        }
+        
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+        }
+        
+        .info-item-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-md);
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+        
+        .info-item-content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-item-content p {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+        }
+        
+        .interests-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+        }
+        
+        .interest-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            color: var(--color-text-muted);
+        }
+        
+        .interest-item .icon {
+            font-size: 1.25rem;
+        }
+        
+        /* Trading Section */
+        .trading-section {
+            background: var(--color-bg-alt);
+            padding: var(--space-3xl) 0;
+        }
+        
+        .trading-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            border: 1px solid var(--color-border-light);
+        }
+        
+        .trading-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .trading-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border-radius: var(--radius-lg);
+            font-size: 1.75rem;
+        }
+        
+        .trading-header h3 {
+            font-size: 1.5rem;
+        }
+        
+        .trading-content p {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .sectors-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-md);
+        }
+        
+        .sector-card {
+            text-align: center;
+            padding: var(--space-lg);
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-md);
+            transition: var(--transition-fast);
+        }
+        
+        .sector-card:hover {
+            background: rgba(245, 158, 11, 0.08);
+        }
+        
+        .sector-card .icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .sector-card h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sector-card p {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+        
+        @media (max-width: 1024px) {
+            .about-hero-inner {
+                grid-template-columns: 1fr;
+            }
+            
+            .about-photo {
+                position: static;
+                max-width: 250px;
+                margin: 0 auto var(--space-xl);
+            }
+            
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .interests-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .sectors-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .interests-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sectors-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="navbar-logo">
+                <span class="logo-icon">RG</span>
+                <span>Ryan Greene</span>
+            </a>
+            
+            <ul class="navbar-nav" id="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/about.html" class="nav-link active">About</a></li>
+                <li><a href="/projects.html" class="nav-link">Projects</a></li>
+                <li><a href="/games.html" class="nav-link">Games</a></li>
+                <li><a href="/realestate.html" class="nav-link">Estimator</a></li>
+                <li><a href="/contact.html" class="nav-link nav-cta">Contact</a></li>
+            </ul>
+            
+            <button class="navbar-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- About Hero -->
+        <section class="about-hero">
+            <div class="container">
+                <div class="about-hero-inner">
+                    <div class="about-photo">
+                        <div class="photo-wrapper">
+                            <div class="photo-inner">
+                                👨‍💻
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="about-intro">
+                        <h1>About Me</h1>
+                        <p class="subtitle">Computer Engineering @ Penn State • Class of 2026</p>
+                        
+                        <div class="bio">
+                            <p>
+                                I'm Ryan Greene, a Computer Engineering student at Penn State University, 
+                                graduating in May 2026. I enjoy working at the intersection of systems programming, 
+                                data engineering, and embedded systems — taking ideas from theory to working prototypes, 
+                                and then turning them into scalable, maintainable solutions.
+                            </p>
+                            
+                            <p>
+                                During my internship at the <strong>Financial Industry Regulatory Authority (FINRA)</strong>, 
+                                I authored over <strong>10,000 lines of production SQL</strong> and helped build data migration 
+                                pipelines that ingest millions of market-regulation records. I also owned a Power BI dashboard 
+                                that tracked dataset usage as schemas evolved, making it easier for teams to understand what 
+                                data was still in use and how changes would affect downstream reports and GenAI use cases.
+                            </p>
+                            
+                            <p>
+                                One highlight was our team's <strong>1st-place project at the 2025 FINRA Creatathon</strong>: 
+                                an AI-powered contract change detection system. We used AWS Lambda, DynamoDB, and Step Functions 
+                                to build a serverless pipeline that scraped vendor terms & conditions, ran clause-level comparisons, 
+                                and flagged high-risk changes. The system cut review time from 100+ hours to under 25.
+                            </p>
+                            
+                            <p>
+                                I've built projects across embedded systems, OS concepts, data engineering, and digital design — 
+                                including an HCS12 waveform generator with a 24-hour clock, a custom malloc implementation, 
+                                a C-based thread synchronization library, and a 5-stage pipelined MIPS CPU.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills & Info Section -->
+        <section class="about-section">
+            <div class="container">
+                <div class="about-grid">
+                    <!-- Technical Skills -->
+                    <div class="info-card reveal">
+                        <h3><span class="icon">💻</span> Technical Skills</h3>
+                        <div class="skills-list">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">C/C++</span>
+                            <span class="skill-tag">SQL</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">AWS</span>
+                            <span class="skill-tag">Verilog</span>
+                            <span class="skill-tag">Assembly</span>
+                            <span class="skill-tag">Git</span>
+                            <span class="skill-tag">Linux</span>
+                            <span class="skill-tag">Power BI</span>
+                            <span class="skill-tag">Flask</span>
+                            <span class="skill-tag">SFML</span>
+                            <span class="skill-tag">WebAssembly</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Education -->
+                    <div class="info-card reveal">
+                        <h3><span class="icon">🎓</span> Education</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <div class="info-item-icon">🏛️</div>
+                                <div class="info-item-content">
+                                    <h4>Penn State University</h4>
+                                    <p>B.S. in Computer Engineering • May 2026</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-item-icon">📚</div>
+                                <div class="info-item-content">
+                                    <h4>Relevant Coursework</h4>
+                                    <p>Digital Design, Computer Architecture, Data Structures, Operating Systems, Database Systems</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Experience -->
+                    <div class="info-card reveal">
+                        <h3><span class="icon">💼</span> Experience</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <div class="info-item-icon">📊</div>
+                                <div class="info-item-content">
+                                    <h4>FINRA — Software/Data Engineering Intern</h4>
+                                    <p>10k+ lines production SQL • Data pipelines • Power BI dashboards • 1st Place Creatathon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Organizations -->
+                    <div class="info-card reveal">
+                        <h3><span class="icon">🤝</span> Organizations</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <div class="info-item-icon">⚡</div>
+                                <div class="info-item-content">
+                                    <h4>IEEE</h4>
+                                    <p>Member — Electrical and Electronics Engineers</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-item-icon">🎯</div>
+                                <div class="info-item-content">
+                                    <h4>Engineering Leadership Society</h4>
+                                    <p>Active Member</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-item-icon">💙</div>
+                                <div class="info-item-content">
+                                    <h4>THON</h4>
+                                    <p>Volunteer — Penn State Dance Marathon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trading & Investing Section -->
+        <section class="trading-section">
+            <div class="container">
+                <div class="trading-card reveal">
+                    <div class="trading-header">
+                        <div class="trading-icon">📈</div>
+                        <div>
+                            <h3>Quantitative & Technical Trading</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="trading-content">
+                        <p>
+                            I have a serious interest in quantitative and technical stock trading. My style combines 
+                            <strong>long-term investing</strong>, <strong>value investing frameworks</strong>, and 
+                            <strong>data-driven technical analysis</strong> using ThinkorSwim, TradingView, and spreadsheet modeling.
+                        </p>
+                        
+                        <p>
+                            I approach markets the same way I approach engineering: <em>systematic, analytical, and model-driven</em>. 
+                            I've done deep dives into multiple sectors, building valuation models and tracking key metrics.
+                        </p>
+                    </div>
+                    
+                    <div class="sectors-grid">
+                        <div class="sector-card">
+                            <div class="icon">🔬</div>
+                            <h4>Semiconductors</h4>
+                            <p>LRCX, AVGO</p>
+                        </div>
+                        <div class="sector-card">
+                            <div class="icon">🔒</div>
+                            <h4>Cybersecurity</h4>
+                            <p>Security & Defense</p>
+                        </div>
+                        <div class="sector-card">
+                            <div class="icon">🔋</div>
+                            <h4>Lithium & EV</h4>
+                            <p>Supply Chain</p>
+                        </div>
+                        <div class="sector-card">
+                            <div class="icon">⚛️</div>
+                            <h4>Nuclear Power</h4>
+                            <p>Rolls-Royce SMR, Hitachi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interests Section -->
+        <section class="about-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Beyond the Code</h2>
+                    <p>Things I'm passionate about outside of work.</p>
+                </div>
+                
+                <div class="interests-grid">
+                    <div class="interest-item reveal">
+                        <span class="icon">📊</span>
+                        <span>Stock Trading & Analysis</span>
+                    </div>
+                    <div class="interest-item reveal">
+                        <span class="icon">🎮</span>
+                        <span>Game Development</span>
+                    </div>
+                    <div class="interest-item reveal">
+                        <span class="icon">🏋️</span>
+                        <span>Fitness & Weightlifting</span>
+                    </div>
+                    <div class="interest-item reveal">
+                        <span class="icon">🔌</span>
+                        <span>Electronics & Hardware</span>
+                    </div>
+                    <div class="interest-item reveal">
+                        <span class="icon">📖</span>
+                        <span>Continuous Learning</span>
+                    </div>
+                    <div class="interest-item reveal">
+                        <span class="icon">🏠</span>
+                        <span>Real Estate Investing</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <h3>Ryan Greene</h3>
+                    <p>Computer Engineering student passionate about building scalable systems and intelligent automation.</p>
+                    <div class="footer-social">
+                        <a href="https://github.com/ryangreene9000" target="_blank" rel="noopener" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ryancgreene1" target="_blank" rel="noopener" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="mailto:Ryangreene2091@gmail.com" aria-label="Email">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about.html">About</a></li>
+                        <li><a href="/projects.html">Projects</a></li>
+                        <li><a href="/games.html">Games</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/projects.html#ai-contract">AI Contract Detector</a></li>
+                        <li><a href="/games/minesweeper/">Minesweeper</a></li>
+                        <li><a href="/realestate.html">ML Estimator</a></li>
+                        <li><a href="/projects.html#mips">MIPS Processor</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:Ryangreene2091@gmail.com">Email</a></li>
+                        <li><a href="https://www.linkedin.com/in/ryancgreene1" target="_blank">LinkedIn</a></li>
+                        <li><a href="https://github.com/ryangreene9000" target="_blank">GitHub</a></li>
+                        <li><a href="tel:650-454-4727">Phone</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 Ryan Greene — All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/scripts/main.js"></script>
+</body>
+</html>
+
