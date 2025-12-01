@@ -1,17 +1,15 @@
 # Flask ML API Requirements
-# Ryan Greene Portfolio - Housing Price Estimator
+# Housing Price Estimator - SFR Only Pipeline
 
 # Web Framework
 Flask==2.2.5
 Werkzeug==2.2.3
-
-# CORS support
 flask-cors==4.0.0
 
-# WSGI Server for production
+# WSGI Server
 gunicorn==21.2.0
 
-# Data processing
+# Data Processing
 pandas==2.0.3
 numpy==1.24.3
 
@@ -19,3 +17,5 @@ numpy==1.24.3
 scikit-learn==1.3.0
 joblib==1.3.1
 
+# HTTP Requests (for scraper)
+requests==2.31.0

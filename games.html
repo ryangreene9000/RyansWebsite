@@ -256,6 +256,55 @@
             color: #3b82f6;
         }
         
+        .status-playable {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+        
+        /* Tetris Preview */
+        .tetris-preview {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .tetris-piece {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .piece-t {
+            background: #9b59b6;
+            clip-path: polygon(33% 0%, 66% 0%, 66% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 50%, 33% 50%);
+        }
+        
+        .piece-i {
+            background: #00f5ff;
+            width: 16px;
+            height: 64px;
+            border-radius: 2px;
+        }
+        
+        .piece-o {
+            background: #ffd700;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .piece-s {
+            background: #2ecc71;
+            clip-path: polygon(33% 0%, 100% 0%, 100% 50%, 66% 50%, 66% 100%, 0% 100%, 0% 50%, 33% 50%);
+        }
+        
+        /* Game Card Actions */
+        .game-card-actions {
+            margin-top: var(--space-md);
+        }
+        
         .game-card-title {
             font-size: 1.125rem;
             margin-bottom: var(--space-sm);
@@ -483,55 +532,33 @@
                     </div>
                 </article>
 
-                <!-- More Games Coming Soon -->
+                <!-- More Playable Games -->
                 <div class="section-header">
                     <h2>More Games</h2>
-                    <p>Additional games in development. Check back soon!</p>
+                    <p>More playable browser games built from scratch.</p>
                 </div>
                 
                 <div class="games-grid">
-                    <!-- Placeholder Game 1 -->
+                    <!-- Tetris - Playable -->
                     <article class="game-card reveal">
-                        <div class="game-card-image">
-                            <span class="placeholder-icon">🐍</span>
+                        <div class="game-card-image" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+                            <div class="tetris-preview">
+                                <div class="tetris-piece piece-t"></div>
+                                <div class="tetris-piece piece-i"></div>
+                                <div class="tetris-piece piece-o"></div>
+                                <div class="tetris-piece piece-s"></div>
+                            </div>
                         </div>
                         <div class="game-card-content">
-                            <span class="game-card-status status-coming-soon">Coming Soon</span>
-                            <h3 class="game-card-title">Snake</h3>
-                            <p class="game-card-description">
-                                Classic snake game with modern graphics and smooth controls. 
-                                Collect food, grow longer, and don't hit the walls!
-                            </p>
-                        </div>
-                    </article>
-                    
-                    <!-- Placeholder Game 2 -->
-                    <article class="game-card reveal">
-                        <div class="game-card-image">
-                            <span class="placeholder-icon">🧱</span>
-                        </div>
-                        <div class="game-card-content">
-                            <span class="game-card-status status-in-development">In Development</span>
+                            <span class="game-card-status status-playable">Playable</span>
                             <h3 class="game-card-title">Tetris</h3>
                             <p class="game-card-description">
-                                The iconic puzzle game. Rotate and place falling blocks to 
-                                complete lines and score points.
+                                Classic block-stacking puzzle game. Rotate and place falling tetrominoes 
+                                to clear lines and score points. Includes levels and increasing speed.
                             </p>
-                        </div>
-                    </article>
-                    
-                    <!-- Placeholder Game 3 -->
-                    <article class="game-card reveal">
-                        <div class="game-card-image">
-                            <span class="placeholder-icon">🎯</span>
-                        </div>
-                        <div class="game-card-content">
-                            <span class="game-card-status status-coming-soon">Coming Soon</span>
-                            <h3 class="game-card-title">2048</h3>
-                            <p class="game-card-description">
-                                Slide numbered tiles on a grid to combine them and reach the 
-                                2048 tile. Simple to learn, hard to master.
-                            </p>
+                            <div class="game-card-actions">
+                                <a href="/games/tetris/" class="btn btn-primary btn-sm">🎮 Play Now</a>
+                            </div>
                         </div>
                     </article>
                 </div>
@@ -582,8 +609,8 @@
                     <ul>
                         <li><a href="/projects.html#ai-contract">AI Contract Detector</a></li>
                         <li><a href="/games/minesweeper/">Minesweeper</a></li>
+                        <li><a href="/games/tetris/">Tetris</a></li>
                         <li><a href="/realestate.html">ML Estimator</a></li>
-                        <li><a href="/projects.html#mips">MIPS Processor</a></li>
                     </ul>
                 </div>
                 

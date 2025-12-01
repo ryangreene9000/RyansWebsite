@@ -208,6 +208,49 @@
             gap: 0.5rem;
         }
         
+        /* How to Play Section */
+        .how-to-play {
+            max-width: 500px;
+            background: var(--color-bg-alt);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .how-to-play h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--color-primary-light);
+        }
+        
+        .how-to-play-list {
+            list-style: none;
+            margin: 0 0 1rem 0;
+            padding: 0;
+        }
+        
+        .how-to-play-list li {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .how-to-play-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .how-to-play-list strong {
+            color: var(--color-text);
+        }
+        
+        .how-to-play-tip {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            padding-top: 0.5rem;
+        }
+        
         /* Responsive */
         @media (max-width: 600px) {
             .game-header {
@@ -290,10 +333,17 @@
             </div>
         </div>
         
-        <!-- Mobile hint -->
-        <p style="color: var(--color-text-muted); font-size: 0.8rem; text-align: center;">
-            📱 On mobile: Tap to reveal, long-press to flag
-        </p>
+        <!-- How to Play Section -->
+        <div class="how-to-play">
+            <h3>How to Play</h3>
+            <ul class="how-to-play-list">
+                <li><strong>Left Click</strong> — Reveal a tile</li>
+                <li><strong>Right Click</strong> — Flag/unflag a mine (long-press on mobile)</li>
+                <li><strong>Numbers</strong> — Show how many mines touch that tile</li>
+                <li><strong>Goal</strong> — Clear all safe tiles without hitting a mine</li>
+            </ul>
+            <p class="how-to-play-tip">💡 Tip: Use the numbers to deduce where mines are hidden!</p>
+        </div>
     </main>
 
     <!-- Game Script -->

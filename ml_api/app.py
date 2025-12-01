@@ -1,12 +1,16 @@
 """
 Ryan Greene Portfolio - Housing Price Estimator API
-Flask REST API for ML-powered housing price predictions
+Flask REST API for ML-powered housing price predictions.
 
-This API provides housing price estimates based on property features
-using a K-Nearest Neighbors regression model with ZIP code filtering.
+This API:
+- Uses ONLY single-family residential (SFR) sold listings
+- Filters strictly by ZIP code
+- Requires minimum 50 comparable homes
+- Trains/uses KNN model on ZIP-specific SFR data
 """
 
 import os
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
@@ -16,6 +20,7 @@ try:
     import joblib
     import pandas as pd
     from sklearn.neighbors import KNeighborsRegressor
+    from sklearn.preprocessing import StandardScaler
     ML_AVAILABLE = True
 except ImportError:
     ML_AVAILABLE = False
@@ -28,7 +33,6 @@ except ImportError:
 
 app = Flask(__name__)
 
-# Enable CORS for all routes (allows frontend to call API)
 CORS(app, resources={
     r"/*": {
         "origins": [
@@ -44,250 +48,344 @@ CORS(app, resources={
 })
 
 # ============================================
+# Configuration Constants
+# ============================================
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(SCRIPT_DIR, 'housing_data.csv')
+MODEL_PATH = os.path.join(SCRIPT_DIR, 'knn_model.pkl')
+SCALER_PATH = os.path.join(SCRIPT_DIR, 'scaler.pkl')
+METADATA_PATH = os.path.join(SCRIPT_DIR, 'model_metadata.json')
+
+# Minimum comparable homes for reliable estimate
+MIN_COMPARABLE_HOMES = 50
+
+# Property type filters
+INCLUDE_PROPERTY_TYPES = [
+    "single family", "single family residence", "single family residential",
+    "residential", "house", "sfr", "detached"
+]
+
+EXCLUDE_PROPERTY_TYPES = [
+    "condo", "condominium", "townhome", "townhouse", "apartment", "apt",
+    "multi", "multi-family", "multifamily", "duplex", "triplex", "fourplex",
+    "quadplex", "mobile", "manufactured", "land", "lot", "commercial"
+]
+
+# Data quality bounds
+MIN_PRICE = 150000
+MAX_PRICE = 10000000
+MIN_SQFT = 300
+MAX_SQFT = 10000
+MAX_BEDS = 8
+MAX_BATHS = 8
+
+# ============================================
 # Data and Model Loading
 # ============================================
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'knn_model.pkl')
-DATA_PATH = os.path.join(os.path.dirname(__file__), 'housing_data.csv')
-
-model = None
 housing_df = None
+global_model = None
+global_scaler = None
+model_metadata = None
 
-def load_model():
-    """Load the trained KNN model from disk."""
-    global model
-    
-    if not ML_AVAILABLE:
-        print("ML libraries not available. Using fallback.")
-        return None
-    
-    if os.path.exists(MODEL_PATH):
-        try:
-            model = joblib.load(MODEL_PATH)
-            print(f"Model loaded successfully from {MODEL_PATH}")
-            return model
-        except Exception as e:
-            print(f"Error loading model: {e}")
-            return None
-    else:
-        print(f"Model file not found at {MODEL_PATH}. Using fallback estimation.")
-        return None
 
 def load_housing_data():
-    """Load the housing dataset for ZIP code filtering."""
+    """Load the cleaned housing dataset."""
     global housing_df
     
     if not ML_AVAILABLE or pd is None:
-        print("Pandas not available. ZIP filtering disabled.")
+        print("Pandas not available.")
         return None
     
     if os.path.exists(DATA_PATH):
         try:
             housing_df = pd.read_csv(DATA_PATH)
-            print(f"Housing data loaded: {len(housing_df)} records")
+            
+            # Pre-process property type for filtering
+            if 'property_type' in housing_df.columns:
+                housing_df['property_type_clean'] = (
+                    housing_df['property_type']
+                    .astype(str).str.lower().str.strip()
+                )
+            
+            print(f"✅ Loaded {len(housing_df)} SFR records from {DATA_PATH}")
             return housing_df
         except Exception as e:
-            print(f"Error loading housing data: {e}")
+            print(f"Error loading data: {e}")
             return None
     else:
-        print(f"Housing data not found at {DATA_PATH}. Using fallback estimation.")
+        print(f"Data file not found: {DATA_PATH}")
         return None
 
-# Try to load model and data on startup
-load_model()
+
+def load_model():
+    """Load the trained model and scaler."""
+    global global_model, global_scaler, model_metadata
+    
+    if not ML_AVAILABLE:
+        return None, None
+    
+    try:
+        if os.path.exists(MODEL_PATH):
+            global_model = joblib.load(MODEL_PATH)
+            print(f"✅ Model loaded from {MODEL_PATH}")
+        
+        if os.path.exists(SCALER_PATH):
+            global_scaler = joblib.load(SCALER_PATH)
+            print(f"✅ Scaler loaded from {SCALER_PATH}")
+        
+        if os.path.exists(METADATA_PATH):
+            with open(METADATA_PATH, 'r') as f:
+                model_metadata = json.load(f)
+            print(f"✅ Metadata loaded: {model_metadata.get('total_samples', 0)} samples")
+        
+        return global_model, global_scaler
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return None, None
+
+
+# Load on startup
 load_housing_data()
+load_model()
 
 # ============================================
-# Property Type Constants
+# Data Filtering Functions
 # ============================================
 
-# Valid single-family home property types (lowercase for comparison)
-SINGLE_FAMILY_TYPES = [
-    'single family',
-    'single-family',
-    'singlefamily',
-    'house',
-    'sfh',
-    'single family home',
-    'single-family home',
-    'detached',
-    'single family residential',
-    'residential'
-]
-
-# ============================================
-# ZIP Code Based Estimation
-# ============================================
-
-def filter_single_family(df):
-    """
-    Filter DataFrame to include only single-family homes.
+def is_single_family(property_type):
+    """Check if property type is single-family residential."""
+    if not property_type:
+        return False
     
-    Args:
-        df: pandas DataFrame with property_type column
+    prop_lower = str(property_type).lower().strip()
     
-    Returns:
-        Filtered DataFrame with only single-family homes
-    """
-    if 'property_type' not in df.columns:
-        # If no property_type column, return as-is
+    # Exclude non-SFR types
+    for exc in EXCLUDE_PROPERTY_TYPES:
+        if exc in prop_lower:
+            return False
+    
+    # Include only valid SFR types
+    for inc in INCLUDE_PROPERTY_TYPES:
+        if inc in prop_lower:
+            return True
+    
+    return False
+
+
+def filter_sfr_only(df):
+    """Filter to single-family residential only."""
+    if 'property_type_clean' not in df.columns and 'property_type' not in df.columns:
         return df
     
-    # Clean and normalize property type
     df = df.copy()
-    df['property_type_clean'] = df['property_type'].astype(str).str.lower().str.strip()
     
-    # Filter to single-family homes only
-    filtered = df[df['property_type_clean'].isin(SINGLE_FAMILY_TYPES)]
+    if 'property_type_clean' not in df.columns:
+        df['property_type_clean'] = df['property_type'].astype(str).str.lower().str.strip()
     
-    return filtered
+    # Exclude non-SFR
+    exclude_mask = df['property_type_clean'].apply(
+        lambda x: any(exc in x for exc in EXCLUDE_PROPERTY_TYPES)
+    )
+    df = df[~exclude_mask]
+    
+    # Include only SFR
+    include_mask = df['property_type_clean'].apply(
+        lambda x: any(inc in x for inc in INCLUDE_PROPERTY_TYPES)
+    )
+    df = df[include_mask]
+    
+    return df
+
+
+def get_zip_data(zip_code):
+    """
+    Get filtered SFR data for a specific ZIP code.
+    Returns (dataframe, error_code).
+    """
+    global housing_df
+    
+    if housing_df is None:
+        return None, "no_data"
+    
+    # STRICT ZIP code match
+    zip_df = housing_df[housing_df['zip_code'] == zip_code].copy()
+    
+    if zip_df.empty:
+        return None, "no_homes_in_zip"
+    
+    # Filter to SFR only
+    sfr_df = filter_sfr_only(zip_df)
+    
+    if sfr_df.empty:
+        return None, "no_sfr_in_zip"
+    
+    # Check minimum samples
+    if len(sfr_df) < MIN_COMPARABLE_HOMES:
+        return sfr_df, "not_enough_comparables"
+    
+    # Apply quality filters
+    sfr_df = sfr_df[
+        (sfr_df['price'] >= MIN_PRICE) & 
+        (sfr_df['price'] <= MAX_PRICE) &
+        (sfr_df['sqft'] >= MIN_SQFT) &
+        (sfr_df['sqft'] <= MAX_SQFT) &
+        (sfr_df['beds'] <= MAX_BEDS) &
+        (sfr_df['baths'] <= MAX_BATHS)
+    ]
+    
+    # Sort by price
+    sfr_df = sfr_df.sort_values('price')
+    
+    # Debug output
+    print(f"\nZIP {zip_code} SUMMARY:")
+    print(sfr_df['price'].describe())
+    if 'property_type' in sfr_df.columns:
+        print(sfr_df['property_type'].value_counts())
+    print(f"Total records used: {len(sfr_df)}")
+    
+    return sfr_df, None
+
+
+# ============================================
+# ML Prediction Functions
+# ============================================
+
+def train_zip_model(zip_df):
+    """Train KNN model on ZIP-specific SFR data."""
+    if not ML_AVAILABLE or len(zip_df) < MIN_COMPARABLE_HOMES:
+        return None, None
+    
+    try:
+        feature_cols = ['sqft', 'beds', 'baths', 'age']
+        
+        # Validate columns exist
+        for col in feature_cols + ['price']:
+            if col not in zip_df.columns:
+                return None, None
+        
+        X = zip_df[feature_cols].values
+        y = zip_df['price'].values
+        
+        # Remove NaN
+        valid = ~(np.isnan(X).any(axis=1) | np.isnan(y))
+        X, y = X[valid], y[valid]
+        
+        if len(X) < MIN_COMPARABLE_HOMES:
+            return None, None
+        
+        # Scale and train
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        
+        k = min(15, max(3, int(np.sqrt(len(X)))))
+        model = KNeighborsRegressor(n_neighbors=k, weights='distance')
+        model.fit(X_scaled, y)
+        
+        return model, scaler
+    except Exception as e:
+        print(f"Training error: {e}")
+        return None, None
+
+
+def predict_price(model, scaler, sqft, beds, baths, age):
+    """Make price prediction using trained model."""
+    if model is None or scaler is None:
+        return None
+    
+    try:
+        features = np.array([[sqft, beds, baths, age]])
+        features_scaled = scaler.transform(features)
+        return float(model.predict(features_scaled)[0])
+    except Exception as e:
+        print(f"Prediction error: {e}")
+        return None
 
 
 def estimate_by_zip(zip_code, sqft, beds, baths, age):
     """
-    Estimate home price using ZIP code filtered data.
-    Only uses single-family homes (excludes condos, apartments, townhomes, etc.)
-    
-    Args:
-        zip_code: ZIP code to filter by
-        sqft: Square footage of the property
-        beds: Number of bedrooms
-        baths: Number of bathrooms
-        age: Age of the home in years
-    
-    Returns:
-        tuple: (estimate, method, error_message)
+    Main estimation function.
+    Filters to ZIP-specific SFR data and trains model.
     """
-    global housing_df
+    # Get filtered data
+    zip_df, error = get_zip_data(zip_code)
     
-    if housing_df is None or not ML_AVAILABLE:
-        return None, None, "no_data"
+    if error and error != "not_enough_comparables":
+        return None, None, error, 0
     
-    try:
-        # Step 1: Filter by ZIP code
-        zip_filtered_df = housing_df[housing_df['zip_code'] == zip_code].copy()
+    if zip_df is None or len(zip_df) == 0:
+        return None, None, "no_data", 0
+    
+    comparables = len(zip_df)
+    
+    # Need minimum samples
+    if comparables < MIN_COMPARABLE_HOMES:
+        return None, None, "not_enough_comparables", comparables
+    
+    # Train model on this ZIP's SFR data
+    model, scaler = train_zip_model(zip_df)
+    
+    if model is not None:
+        estimate = predict_price(model, scaler, sqft, beds, baths, age)
         
-        # Check if any homes exist for this ZIP
-        if zip_filtered_df.empty:
-            return None, None, "no_homes_in_zip"
-        
-        # Step 2: Filter to single-family homes only
-        filtered_df = filter_single_family(zip_filtered_df)
-        
-        # Check if any single-family homes exist for this ZIP
-        if filtered_df.empty:
-            return None, None, "no_single_family_in_zip"
-        
-        # Step 3: Sort by price (optional, for consistency)
-        if 'price' in filtered_df.columns:
-            filtered_df = filtered_df.sort_values('price', ascending=True)
-        
-        # Step 4: Calculate price per sqft for filtered single-family homes
-        if 'price' in filtered_df.columns and 'sqft' in filtered_df.columns:
-            filtered_df['price_per_sqft'] = filtered_df['price'] / filtered_df['sqft']
-            
-            # Get average price per sqft for this ZIP (single-family only)
-            avg_price_per_sqft = filtered_df['price_per_sqft'].mean()
-            
-            # Base estimate from price per sqft
-            estimate = avg_price_per_sqft * sqft
-            
-            # Adjust for bedrooms (compare to ZIP average)
-            if 'beds' in filtered_df.columns:
-                avg_beds = filtered_df['beds'].mean()
-                bed_diff = beds - avg_beds
-                estimate += bed_diff * 15000  # $15k per bedroom difference
-            
-            # Adjust for bathrooms (compare to ZIP average)
-            if 'baths' in filtered_df.columns:
-                avg_baths = filtered_df['baths'].mean()
-                bath_diff = baths - avg_baths
-                estimate += bath_diff * 10000  # $10k per bathroom difference
-            
-            # Adjust for age (compare to ZIP average)
-            if 'age' in filtered_df.columns:
-                avg_age = filtered_df['age'].mean()
-                age_diff = age - avg_age
-                # Newer homes are worth more (-0.5% per year difference)
-                age_adjustment = 1 - (age_diff * 0.005)
-                age_adjustment = max(0.7, min(1.3, age_adjustment))  # Cap adjustment
-                estimate *= age_adjustment
-            
-            # Ensure reasonable bounds based on single-family homes in ZIP
-            min_price = filtered_df['price'].min() * 0.5
-            max_price = filtered_df['price'].max() * 1.5
+        if estimate is not None:
+            # Bound to reasonable range for this ZIP
+            min_price = zip_df['price'].min() * 0.6
+            max_price = zip_df['price'].max() * 1.4
             estimate = max(min_price, min(max_price, estimate))
             
-            return round(estimate, 2), 'zip_filtered_sfh', None
-        else:
-            return None, None, "missing_columns"
-            
+            return round(estimate, 2), 'zip_ml_sfr', None, comparables
+    
+    # Fallback to price-per-sqft
+    try:
+        zip_df['ppsf'] = zip_df['price'] / zip_df['sqft']
+        avg_ppsf = zip_df['ppsf'].mean()
+        
+        estimate = avg_ppsf * sqft
+        
+        # Adjustments
+        if 'beds' in zip_df.columns:
+            estimate += (beds - zip_df['beds'].mean()) * 15000
+        if 'baths' in zip_df.columns:
+            estimate += (baths - zip_df['baths'].mean()) * 10000
+        if 'age' in zip_df.columns:
+            age_adj = 1 - ((age - zip_df['age'].mean()) * 0.005)
+            estimate *= max(0.7, min(1.3, age_adj))
+        
+        min_price = zip_df['price'].min() * 0.6
+        max_price = zip_df['price'].max() * 1.4
+        estimate = max(min_price, min(max_price, estimate))
+        
+        return round(estimate, 2), 'zip_avg_sfr', None, comparables
     except Exception as e:
-        print(f"ZIP estimation error: {e}")
-        return None, None, "estimation_error"
+        print(f"Fallback calc error: {e}")
+        return None, None, "calculation_error", comparables
 
-# ============================================
-# Fallback Estimation (when data not available)
-# ============================================
 
 def fallback_estimate(zip_code, sqft, beds, baths, age):
-    """
-    Generate a fallback estimate when housing data is not available.
-    Uses ZIP code prefix to estimate regional pricing.
-    
-    Args:
-        zip_code: ZIP code (used for regional adjustment)
-        sqft: Square footage of the property
-        beds: Number of bedrooms
-        baths: Number of bathrooms
-        age: Age of the home in years
-    
-    Returns:
-        Estimated price (float)
-    """
-    # Regional price adjustment based on ZIP code first digit
-    # This is a rough approximation of regional cost differences
+    """Regional fallback when no ZIP data available."""
     zip_prefix = int(str(zip_code)[0]) if zip_code else 5
     
-    # Base price per sqft varies by region (rough national estimates)
-    regional_multipliers = {
-        0: 280,  # Northeast (MA, CT, etc.)
-        1: 250,  # Northeast (NY, NJ, PA)
-        2: 220,  # Mid-Atlantic (DC, VA, MD)
-        3: 180,  # Southeast (FL, GA)
-        4: 160,  # Midwest (OH, MI, IN)
-        5: 170,  # South (TX, LA)
-        6: 150,  # Central (KS, MO)
-        7: 160,  # South Central (TX, OK)
-        8: 200,  # Mountain (CO, AZ)
-        9: 350,  # West Coast (CA, WA, OR)
+    # Regional price per sqft estimates
+    regional = {
+        0: 300, 1: 280, 2: 250, 3: 200, 4: 180,
+        5: 190, 6: 170, 7: 180, 8: 220, 9: 400
     }
     
-    base_price_per_sqft = regional_multipliers.get(zip_prefix, 200)
+    ppsf = regional.get(zip_prefix, 220)
+    estimate = sqft * ppsf
     
-    # Calculate base estimate
-    estimate = sqft * base_price_per_sqft
+    if beds > 3:
+        estimate += (beds - 3) * 15000
+    if baths > 2:
+        estimate += (baths - 2) * 10000
     
-    # Bedroom adjustment (+$12,000 per bedroom after 2)
-    if beds > 2:
-        estimate += (beds - 2) * 12000
-    elif beds < 2:
-        estimate -= (2 - beds) * 10000
-    
-    # Bathroom adjustment (+$8,000 per bathroom after 1.5)
-    if baths > 1.5:
-        estimate += (baths - 1.5) * 8000
-    elif baths < 1.5:
-        estimate -= (1.5 - baths) * 6000
-    
-    # Age depreciation (-0.4% per year, max 25%)
-    age_factor = max(1 - (age * 0.004), 0.75)
+    age_factor = max(1 - (age * 0.004), 0.7)
     estimate *= age_factor
     
-    # Ensure minimum reasonable value
-    estimate = max(estimate, 50000)
-    
-    return round(estimate, 2)
+    return round(max(estimate, 100000), 2)
+
 
 # ============================================
 # API Routes
@@ -295,168 +393,110 @@ def fallback_estimate(zip_code, sqft, beds, baths, age):
 
 @app.route('/', methods=['GET'])
 def index():
-    """
-    Health check endpoint.
-    Returns API status and availability information.
-    """
+    """Health check."""
     return jsonify({
         'status': 'API running',
-        'version': '1.1.0',
-        'model_loaded': model is not None,
+        'version': '3.0.0',
         'data_loaded': housing_df is not None,
-        'data_records': len(housing_df) if housing_df is not None else 0,
-        'ml_available': ML_AVAILABLE,
-        'endpoints': {
-            'GET /': 'Health check (this endpoint)',
-            'POST /predict': 'Get housing price prediction',
-            'GET /health': 'Detailed health check'
-        }
+        'records': len(housing_df) if housing_df is not None else 0,
+        'model_loaded': global_model is not None,
+        'min_comparables': MIN_COMPARABLE_HOMES
     })
 
 
 @app.route('/health', methods=['GET'])
 def health():
-    """
-    Detailed health check endpoint.
-    Useful for monitoring and deployment verification.
-    """
+    """Detailed health check."""
     return jsonify({
         'status': 'healthy',
-        'model_status': 'loaded' if model else 'using fallback',
-        'data_status': 'loaded' if housing_df is not None else 'not available',
-        'ml_libraries': 'available' if ML_AVAILABLE else 'not installed'
+        'data': 'loaded' if housing_df is not None else 'missing',
+        'model': 'loaded' if global_model is not None else 'missing',
+        'ml_available': ML_AVAILABLE
     })
 
 
 @app.route('/predict', methods=['POST'])
 def predict():
     """
-    Main prediction endpoint with ZIP code filtering.
-    
-    Expects JSON body with:
-        - zip (required): ZIP code for filtering
-        - sqft (required): Square footage of the property
-        - beds (required): Number of bedrooms
-        - baths (required): Number of bathrooms
-        - age (required): Age of the home in years
-    
-    Returns JSON with:
-        - estimate: Predicted price
-        - method: 'zip_filtered', 'model', or 'fallback'
-        - input: Echo of input values
+    Main prediction endpoint.
+    Uses ZIP-filtered SFR-only data for estimates.
     """
     try:
-        # Parse request data
         data = request.get_json()
         
         if not data:
             return jsonify({
                 'error': 'No data provided',
-                'message': 'Please send JSON data with zip, sqft, beds, baths, and age fields'
+                'message': 'Send JSON with: zip, sqft, beds, baths, age'
             }), 400
         
-        # Extract and validate required fields
-        required_fields = ['sqft', 'beds', 'baths', 'age']
-        missing_fields = [f for f in required_fields if f not in data]
-        
-        if missing_fields:
-            return jsonify({
-                'error': 'Missing required fields',
-                'missing': missing_fields,
-                'message': f'Please provide: {", ".join(missing_fields)}'
-            }), 400
-        
-        # Parse and validate numeric values
+        # Parse inputs
         try:
-            # ZIP code (optional but recommended)
             zip_code = None
-            if 'zip' in data or 'zipcode' in data or 'zip_code' in data:
-                zip_raw = data.get('zip') or data.get('zipcode') or data.get('zip_code')
-                zip_code = int(str(zip_raw).strip()[:5])  # Take first 5 digits
+            for key in ['zip', 'zipcode', 'zip_code']:
+                if key in data:
+                    zip_code = int(str(data[key]).strip()[:5])
+                    break
             
             sqft = float(data['sqft'])
             beds = int(data['beds'])
             baths = float(data['baths'])
-            age = int(data['age'])
-        except (ValueError, TypeError) as e:
+            age = int(data.get('age', 30))
+        except (ValueError, KeyError, TypeError) as e:
             return jsonify({
-                'error': 'Invalid data types',
-                'message': 'All fields must be numeric values'
+                'error': 'Invalid input',
+                'message': str(e)
             }), 400
         
         # Validate ranges
-        if sqft < 100 or sqft > 100000:
-            return jsonify({
-                'error': 'Invalid sqft value',
-                'message': 'Square footage must be between 100 and 100,000'
-            }), 400
+        if sqft < 100 or sqft > 50000:
+            return jsonify({'error': 'sqft must be 100-50000'}), 400
+        if beds < 0 or beds > 10:
+            return jsonify({'error': 'beds must be 0-10'}), 400
+        if baths < 0 or baths > 10:
+            return jsonify({'error': 'baths must be 0-10'}), 400
+        if zip_code and (zip_code < 501 or zip_code > 99950):
+            return jsonify({'error': 'Invalid ZIP code'}), 400
         
-        if beds < 0 or beds > 20:
-            return jsonify({
-                'error': 'Invalid beds value',
-                'message': 'Bedrooms must be between 0 and 20'
-            }), 400
-        
-        if baths < 0 or baths > 20:
-            return jsonify({
-                'error': 'Invalid baths value',
-                'message': 'Bathrooms must be between 0 and 20'
-            }), 400
-        
-        if age < 0 or age > 500:
-            return jsonify({
-                'error': 'Invalid age value',
-                'message': 'Age must be between 0 and 500 years'
-            }), 400
-        
-        # Validate ZIP code if provided
-        if zip_code is not None and (zip_code < 501 or zip_code > 99950):
-            return jsonify({
-                'error': 'Invalid ZIP code',
-                'message': 'Please enter a valid 5-digit US ZIP code'
-            }), 400
-        
-        # Try ZIP-filtered estimation first
+        # Get estimate
         estimate = None
         method = None
+        comparables = 0
         
-        if zip_code is not None and housing_df is not None:
-            estimate, method, error = estimate_by_zip(zip_code, sqft, beds, baths, age)
+        if zip_code and housing_df is not None:
+            estimate, method, error, comparables = estimate_by_zip(
+                zip_code, sqft, beds, baths, age
+            )
             
             if error == "no_homes_in_zip":
                 return jsonify({
-                    'error': 'No homes found for this ZIP code',
-                    'message': f'No housing data available for ZIP code {zip_code}. Try a nearby ZIP code.',
+                    'error': 'No data for this ZIP code',
                     'zip_code': zip_code
                 }), 400
             
-            if error == "no_single_family_in_zip":
+            if error == "no_sfr_in_zip":
                 return jsonify({
-                    'error': 'No single-family home data found for this ZIP',
-                    'message': f'No single-family homes found in ZIP code {zip_code}. Only condos/apartments may be available in this area.',
+                    'error': 'No single-family homes in this ZIP',
+                    'message': 'Only condos/apartments available',
+                    'zip_code': zip_code
+                }), 400
+            
+            if error == "not_enough_comparables":
+                return jsonify({
+                    'error': 'Not enough comparable single-family homes',
+                    'message': f'Found {comparables}, need {MIN_COMPARABLE_HOMES}',
                     'zip_code': zip_code
                 }), 400
         
-        # Fall back to model prediction if ZIP estimation failed
-        if estimate is None and model is not None:
-            try:
-                features = np.array([[sqft, beds, baths, age]])
-                prediction = model.predict(features)[0]
-                estimate = round(float(prediction), 2)
-                method = 'model'
-            except Exception as e:
-                print(f"Model prediction error: {e}")
-                estimate = None
-        
-        # Final fallback to formula-based estimation
+        # Fallback
         if estimate is None:
             estimate = fallback_estimate(zip_code, sqft, beds, baths, age)
-            method = 'fallback'
+            method = 'regional_fallback'
         
-        # Return prediction result
         return jsonify({
             'estimate': estimate,
             'method': method,
+            'comparables': comparables,
             'input': {
                 'zip_code': zip_code,
                 'sqft': sqft,
@@ -467,17 +507,43 @@ def predict():
         })
     
     except Exception as e:
-        print(f"Prediction error: {e}")
-        return jsonify({
-            'error': 'Prediction failed',
-            'message': 'An unexpected error occurred. Please try again.'
-        }), 500
+        print(f"Error: {e}")
+        return jsonify({'error': 'Prediction failed'}), 500
 
 
 @app.route('/predict', methods=['OPTIONS'])
 def predict_options():
-    """Handle CORS preflight requests."""
     return '', 204
+
+
+@app.route('/debug/<int:zip_code>', methods=['GET'])
+def debug_zip(zip_code):
+    """Debug endpoint to inspect ZIP data."""
+    if housing_df is None:
+        return jsonify({'error': 'No data loaded'}), 500
+    
+    zip_df, error = get_zip_data(zip_code)
+    
+    if error:
+        return jsonify({'error': error, 'zip_code': zip_code}), 400
+    
+    return jsonify({
+        'zip_code': zip_code,
+        'total_records': len(zip_df),
+        'price_stats': {
+            'min': float(zip_df['price'].min()),
+            'max': float(zip_df['price'].max()),
+            'median': float(zip_df['price'].median()),
+            'mean': float(zip_df['price'].mean())
+        },
+        'sqft_stats': {
+            'min': float(zip_df['sqft'].min()),
+            'max': float(zip_df['sqft'].max()),
+            'mean': float(zip_df['sqft'].mean())
+        },
+        'property_types': zip_df['property_type'].value_counts().to_dict() if 'property_type' in zip_df.columns else {},
+        'sample_listings': zip_df[['price', 'sqft', 'beds', 'baths']].head(10).to_dict('records')
+    })
 
 
 # ============================================
@@ -486,31 +552,17 @@ def predict_options():
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({
-        'error': 'Not found',
-        'message': 'The requested endpoint does not exist'
-    }), 404
-
+    return jsonify({'error': 'Not found'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    return jsonify({
-        'error': 'Internal server error',
-        'message': 'An unexpected error occurred'
-    }), 500
+    return jsonify({'error': 'Server error'}), 500
 
 
 # ============================================
-# Main Entry Point
+# Main
 # ============================================
 
 if __name__ == '__main__':
-    # Get port from environment variable (for deployment)
     port = int(os.environ.get('PORT', 5000))
-    
-    # Run the Flask app
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
-    )
+    app.run(host='0.0.0.0', port=port, debug=True)

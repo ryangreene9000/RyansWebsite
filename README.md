@@ -9,7 +9,7 @@ A modern, recruiter-ready developer portfolio website with a Flask ML API backen
 This repository contains:
 - **Static Frontend** - Modern portfolio website (HTML/CSS/JS) for GitHub Pages
 - **Flask ML API** - Housing price estimator backend for Render deployment
-- **Minesweeper Game** - C++ game with WebAssembly for browser play
+- **Browser Games** - Minesweeper and Tetris playable in the browser
 
 ## Quick Start
 
@@ -48,14 +48,18 @@ RyansWebsite/
 │
 ├── assets/
 │   ├── favicon.svg         # Site favicon
+│   ├── tetris.svg          # Tetris thumbnail
 │   └── placeholder.svg     # Placeholder image
 │
 ├── games/
-│   └── minesweeper/        # Minesweeper game
-│       ├── src/main.cpp    # C++ source
-│       ├── CMakeLists.txt  # Build config
-│       ├── index.html      # Game loader
-│       └── README.md       # Build instructions
+│   ├── minesweeper/        # Minesweeper game
+│   │   ├── index.html      # Game page
+│   │   └── minesweeper.js  # Game logic
+│   │
+│   └── tetris/             # Tetris game
+│       ├── index.html      # Game page
+│       ├── style.css       # Game styles
+│       └── tetris.js       # Game logic
 │
 └── ml_api/
     ├── app.py              # Flask API
@@ -71,9 +75,54 @@ RyansWebsite/
 | **Home** | Hero section, featured projects, skills preview |
 | **About** | Full bio, skills, education, experience, interests |
 | **Projects** | Filterable project grid with detailed cards |
-| **Games** | Playable games including Minesweeper |
+| **Games** | Playable games including Minesweeper and Tetris |
 | **Estimator** | ML-powered housing price estimator |
 | **Contact** | Contact info and message form |
+
+## Games
+
+### Minesweeper
+
+Classic mine-clearing puzzle game built with JavaScript and HTML5 Canvas.
+
+**How to Play:**
+- **Left Click** — Reveal a tile
+- **Right Click** — Flag/unflag a suspected mine (long-press on mobile)
+- **Numbers** — Show how many mines touch that tile
+- **Goal** — Clear all safe tiles without hitting a mine
+
+**Features:**
+- Multiple difficulty levels (Easy, Medium, Hard)
+- Recursive flood-fill reveal
+- Timer and mine counter
+- Win/loss detection
+
+**Location:** `/games/minesweeper/`
+
+---
+
+### Tetris
+
+Classic block-stacking puzzle game built with vanilla JavaScript and HTML5 Canvas.
+
+**How to Play:**
+- **← →** — Move piece left/right
+- **↑** or **W** — Rotate piece
+- **↓** — Soft drop (faster fall)
+- **Space** — Hard drop (instant drop)
+- **P** — Pause game
+
+**Features:**
+- All 7 tetromino shapes
+- Ghost piece preview
+- Next piece display
+- Score, level, and line tracking
+- Increasing speed with levels
+- Mobile touch controls
+
+**Location:** `/games/tetris/`
+
+---
 
 ## Customization Points
 
@@ -115,10 +164,11 @@ Add new projects in `projects.html` using the project card template.
 - gunicorn (production server)
 - Flask-CORS
 
-### Game
-- C++17
-- SFML 2.5+
-- WebAssembly (Emscripten)
+### Games
+- JavaScript (ES6+)
+- HTML5 Canvas API
+- CSS3 animations
+- Responsive touch controls
 
 ## Deployment
 

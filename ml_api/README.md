@@ -1,235 +1,189 @@
 # Housing Price Estimator API
 
-A Flask REST API that provides ML-powered housing price predictions using a K-Nearest Neighbors regression model.
-
-## Overview
-
-This API is part of Ryan Greene's portfolio website. It receives property features (square footage, bedrooms, bathrooms, and age) and returns a predicted housing price.
+Flask REST API for ML-powered single-family home price predictions.
 
 ## Features
 
-- 🏠 Housing price predictions based on property features
-- 🤖 K-Nearest Neighbors regression model
-- 🔄 Automatic fallback estimation when model is unavailable
-- 🌐 CORS-enabled for frontend integration
-- 📊 Input validation and error handling
+- **SFR-Only**: Only uses single-family residential sold listings
+- **ZIP-Specific**: Trains model on ZIP code-specific data
+- **Quality Filters**: Removes outliers and bad data
+- **Sold Prices Only**: Uses actual sold prices, not list prices
+- **KNN Model**: K-Nearest Neighbors regression for accuracy
 
-## API Endpoints
+## Data Pipeline
 
-### `GET /`
-Health check endpoint. Returns API status.
+The estimator uses a 3-step data pipeline:
 
-**Response:**
-```json
-{
-  "status": "API running",
-  "version": "1.0.0",
-  "model_loaded": true,
-  "ml_available": true,
-  "endpoints": {
-    "GET /": "Health check",
-    "POST /predict": "Get housing price prediction",
-    "GET /health": "Detailed health check"
-  }
-}
+```
+1. scraper.py      → Fetches sold SFR listings
+2. clean_data.py   → Filters and validates data
+3. train_model.py  → Trains KNN model
 ```
 
-### `GET /health`
-Detailed health check for monitoring.
+### Property Type Filter
 
-**Response:**
-```json
-{
-  "status": "healthy",
-  "model_status": "loaded",
-  "ml_libraries": "available"
-}
-```
+**INCLUDED** (single-family only):
+- Single Family, Single Family Residence
+- Residential, House, SFR, Detached
 
-### `POST /predict`
-Main prediction endpoint.
+**EXCLUDED** (automatically filtered):
+- Condo, Condominium, Townhome, Townhouse
+- Apartment, Multi-Family, Duplex, etc.
 
-**Request Body:**
-```json
-{
-  "sqft": 1800,
-  "beds": 3,
-  "baths": 2,
-  "age": 15
-}
-```
+### Data Quality Filters
 
-**Response:**
-```json
-{
-  "estimate": 425000.00,
-  "method": "model",
-  "input": {
-    "sqft": 1800,
-    "beds": 3,
-    "baths": 2,
-    "age": 15
-  }
-}
-```
+- Price: $150,000 - $10,000,000
+- Square feet: 300 - 10,000
+- Beds: 0-8, Baths: 0-8
+- Sold listings only (no pending/active)
 
-**Parameters:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| sqft | float | Yes | Square footage (100-100,000) |
-| beds | int | Yes | Number of bedrooms (0-20) |
-| baths | float | Yes | Number of bathrooms (0-20) |
-| age | int | Yes | Age of home in years (0-500) |
+## Installation
 
-## Local Development
-
-### Prerequisites
-- Python 3.10+
-- pip
-
-### Installation
-
-1. **Clone the repository:**
 ```bash
-git clone https://github.com/ryangreene9000/RyansWebsite.git
-cd RyansWebsite/ml_api
-```
-
-2. **Create a virtual environment:**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install dependencies:**
-```bash
+cd ml_api
 pip install -r requirements.txt
 ```
 
-4. **Run the development server:**
+## Quick Start
+
+### 1. Generate Sample Data (for testing)
+
 ```bash
+python sample_data.py
+```
+
+### 2. Run Full Pipeline
+
+```bash
+python run_pipeline.py
+```
+
+Or run steps individually:
+
+```bash
+python clean_data.py    # Clean raw data
+python train_model.py   # Train model
+```
+
+### 3. Start API
+
+```bash
+# Development
 python app.py
+
+# Production
+gunicorn app:app -b 0.0.0.0:5000
 ```
 
-The API will be available at `http://localhost:5000`.
+## API Endpoints
 
-### Testing the API
+### Health Check
 
-Using curl:
 ```bash
-# Health check
-curl http://localhost:5000/
-
-# Get prediction
-curl -X POST http://localhost:5000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"sqft": 1800, "beds": 3, "baths": 2, "age": 15}'
+GET /
 ```
 
-Using Python:
-```python
-import requests
+Response:
+```json
+{
+  "status": "API running",
+  "version": "3.0.0",
+  "data_loaded": true,
+  "records": 670
+}
+```
 
-response = requests.post(
-    'http://localhost:5000/predict',
-    json={'sqft': 1800, 'beds': 3, 'baths': 2, 'age': 15}
-)
-print(response.json())
+### Predict Price
+
+```bash
+POST /predict
+Content-Type: application/json
+
+{
+  "zip": 94070,
+  "sqft": 1800,
+  "beds": 3,
+  "baths": 2,
+  "age": 30
+}
+```
+
+Response:
+```json
+{
+  "estimate": 2150000.00,
+  "method": "zip_ml_sfr",
+  "comparables": 80,
+  "input": {
+    "zip_code": 94070,
+    "sqft": 1800,
+    "beds": 3,
+    "baths": 2,
+    "age": 30
+  }
+}
+```
+
+### Debug ZIP Data
+
+```bash
+GET /debug/94070
+```
+
+Shows statistics for a specific ZIP code.
+
+## Error Responses
+
+| Error | Description |
+|-------|-------------|
+| `no_homes_in_zip` | No housing data for this ZIP |
+| `no_sfr_in_zip` | Only condos/apartments in ZIP |
+| `not_enough_comparables` | Need 50+ SFR listings |
+
+## Testing
+
+```bash
+# Test specific ZIP code
+python run_pipeline.py --test 94070
+
+# Expected output for 94070 (San Carlos):
+# Median: ~$2,100,000
+# 1800 sqft 3BR/2BA: ~$2,000,000 - $2,200,000
 ```
 
 ## Deployment to Render
 
-### Step 1: Create a New Web Service
+1. Push to GitHub
+2. Create new Web Service on Render
+3. Set:
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `gunicorn app:app`
+4. Deploy
 
-1. Go to [Render Dashboard](https://dashboard.render.com)
-2. Click "New +" → "Web Service"
-3. Connect your GitHub repository
-4. Configure the service:
-   - **Name:** `housing-estimator-api` (or your preferred name)
-   - **Root Directory:** `ml_api`
-   - **Runtime:** Python 3
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app`
-
-### Step 2: Environment Variables (Optional)
-
-| Variable | Description |
-|----------|-------------|
-| `PORT` | Port to run on (Render sets this automatically) |
-| `FLASK_DEBUG` | Set to `false` for production |
-
-### Step 3: Deploy
-
-Click "Create Web Service" and wait for deployment to complete.
-
-Your API will be available at:
-```
-https://your-service-name.onrender.com
-```
-
-### Step 4: Update Frontend
-
-Update the `API_URL` constant in `/scripts/estimator.js`:
-```javascript
-const API_URL = 'https://your-service-name.onrender.com';
-const DEMO_MODE = false;
-```
-
-## Adding Your Trained Model
-
-To use a trained model instead of the fallback estimation:
-
-1. **Train your KNN model:**
-```python
-from sklearn.neighbors import KNeighborsRegressor
-import joblib
-import pandas as pd
-
-# Load and prepare your training data
-# X should have columns: sqft, beds, baths, age
-# y should be the prices
-
-model = KNeighborsRegressor(n_neighbors=5)
-model.fit(X, y)
-
-# Save the model
-joblib.dump(model, 'knn_model.pkl')
-```
-
-2. **Add the model file:**
-   - Place `knn_model.pkl` in the `ml_api` directory
-   - Commit and push to GitHub
-   - Render will automatically redeploy
-
-## Project Structure
+## File Structure
 
 ```
 ml_api/
-├── app.py              # Main Flask application
-├── requirements.txt    # Python dependencies
-├── runtime.txt         # Python version for Render
-├── README.md           # This file
-└── knn_model.pkl       # Trained model (add this later)
+├── app.py              # Flask API
+├── scraper.py          # Data scraper
+├── clean_data.py       # Data cleaning
+├── train_model.py      # Model training
+├── run_pipeline.py     # Pipeline runner
+├── sample_data.py      # Sample data generator
+├── requirements.txt    # Dependencies
+├── runtime.txt         # Python version
+├── housing_data.csv    # Cleaned SFR data
+├── knn_model.pkl       # Trained model
+└── scaler.pkl          # Feature scaler
 ```
 
-## Error Handling
+## Accuracy
 
-The API returns appropriate HTTP status codes and error messages:
-
-| Status | Description |
-|--------|-------------|
-| 200 | Success |
-| 400 | Bad request (invalid input) |
-| 404 | Endpoint not found |
-| 500 | Server error |
+For Bay Area single-family homes:
+- MAE: ~$150,000 (typical)
+- MAPE: ~8-12%
+- Best for: 1000-4000 sqft, 2-5 beds
 
 ## License
 
-MIT License - Part of Ryan Greene's Portfolio
-
-## Contact
-
-- **Email:** Ryangreene2091@gmail.com
-- **LinkedIn:** [linkedin.com/in/ryancgreene1](https://linkedin.com/in/ryancgreene1)
-- **GitHub:** [github.com/ryangreene9000](https://github.com/ryangreene9000)
-
+© 2025 Ryan Greene - All Rights Reserved
