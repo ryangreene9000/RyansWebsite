@@ -148,4 +148,4 @@ MIT License
 
 ---
 
-Built with 💚 by Ryan Greene
+Built by Ryan Greene
