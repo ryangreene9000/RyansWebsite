@@ -18,6 +18,23 @@
     // Fallback/demo mode when API is not available
     const DEMO_MODE = true;
 
+    // Supported Bay Area ZIP codes (demo mode)
+    // This list should match data/supported_zipcodes.json
+    const SUPPORTED_BAY_AREA_ZIPS = new Set([
+        94002, 94005, 94010, 94014, 94015, 94019,
+        94022, 94024, 94025, 94027, 94028, 94030,
+        94040, 94041, 94043, 94044, 94061, 94062,
+        94063, 94065, 94066, 94070, 94080, 94087,
+        94102, 94103, 94107, 94108, 94109, 94110,
+        94112, 94114, 94115, 94116, 94117, 94118,
+        94121, 94122, 94123, 94124, 94127, 94131,
+        94132, 94133, 94134, 94301, 94306, 94402,
+        95008, 95014, 95030, 95050, 95051, 95054,
+        95070, 95110, 95112, 95116, 95118, 95120,
+        95123, 95124, 95125, 95126, 95128, 95129,
+        95130, 95131, 95132, 95133, 95134, 95135
+    ]);
+
     // Bay Area median SFR prices by ZIP (for demo mode)
     const BAY_AREA_MEDIANS = {
         94070: 2100000,  // San Carlos
@@ -30,6 +47,12 @@
         94061: 1600000,  // Redwood City
         94010: 2500000,  // Burlingame
         94402: 1900000,  // San Mateo
+        94110: 1600000,  // San Francisco (Mission)
+        94102: 1200000,  // San Francisco (Tenderloin)
+        94107: 1400000,  // San Francisco (SoMa)
+        94087: 2200000,  // Sunnyvale
+        95124: 1900000,  // San Jose (Cambrian)
+        95014: 2500000,  // Cupertino
     };
 
     // ============================================
@@ -97,10 +120,17 @@
      * Generate a demo estimate based on input features
      * Uses realistic Bay Area SFR prices
      * @param {object} data - The property data
-     * @returns {object} Estimated price with method info
+     * @returns {object} Estimated price with method info, or error
      */
     function generateDemoEstimate(data) {
         const zip = parseInt(data.zipcode);
+        
+        // Check if ZIP is in supported Bay Area list
+        if (!SUPPORTED_BAY_AREA_ZIPS.has(zip)) {
+            const error = new Error('Unsupported ZIP code. This model only supports Bay Area (California) ZIP codes.');
+            error.isZipError = true;
+            throw error;
+        }
         
         // Check if we have real data for this ZIP
         let medianPrice = BAY_AREA_MEDIANS[zip];
@@ -111,14 +141,28 @@
             // Use known median as base
             comparables = 50 + Math.floor(Math.random() * 50);
         } else {
-            // Fallback: estimate by region
-            const zipPrefix = parseInt(data.zipcode.toString()[0]);
-            const regionalPPSF = {
-                0: 300, 1: 280, 2: 250, 3: 200, 4: 180,
-                5: 190, 6: 170, 7: 180, 8: 220, 9: 400
+            // Fallback: estimate by region for supported but unknown medians
+            const zipPrefix = parseInt(data.zipcode.toString().substring(0, 3));
+            
+            // Bay Area regional estimates
+            const regionalMedians = {
+                940: 1800000,  // SF/San Mateo
+                941: 1200000,  // SF
+                942: 1500000,  // SF/South Bay
+                943: 2000000,  // Palo Alto/Los Altos
+                944: 1600000,  // Redwood City/San Mateo
+                945: 1100000,  // Oakland/East Bay
+                946: 1000000,  // Hayward/Fremont
+                947: 900000,   // East Bay
+                948: 1000000,  // Richmond
+                950: 1500000,  // San Jose
+                951: 1400000,  // San Jose
+                952: 1600000,  // San Jose
             };
-            medianPrice = (regionalPPSF[zipPrefix] || 220) * 1800; // Average home
+            
+            medianPrice = regionalMedians[zipPrefix] || 1500000;
             method = 'regional_fallback';
+            comparables = 30 + Math.floor(Math.random() * 30);
         }
         
         // Calculate price per sqft from median (assuming 1800 sqft median home)
@@ -207,7 +251,15 @@
             
             // Check for errors from API
             if (!response.ok) {
-                throw new Error(result.error || result.message || `API error: ${response.status}`);
+                // Check if this is a ZIP-related error
+                const errorMsg = result.error || result.message || `API error: ${response.status}`;
+                const isZipError = errorMsg.toLowerCase().includes('zip') || 
+                                   errorMsg.toLowerCase().includes('unsupported') ||
+                                   errorMsg.toLowerCase().includes('no data');
+                
+                const error = new Error(errorMsg);
+                error.isZipError = isZipError;
+                throw error;
             }
             
             // Calculate range (±8% of estimate)
@@ -314,16 +366,37 @@
             showResultState('success');
         } catch (error) {
             console.error('Prediction error:', error);
-            showError('Unable to get estimate. Please try again later.');
+            const isZipError = error.isZipError || 
+                               error.message.toLowerCase().includes('zip') ||
+                               error.message.toLowerCase().includes('unsupported');
+            
+            if (isZipError) {
+                showError('We do not have enough data for this ZIP code. This tool currently supports only Bay Area ZIP codes.', true);
+            } else {
+                showError('Unable to get estimate. Please try again later.', false);
+            }
         }
     }
 
     /**
      * Show error message
      * @param {string} message - The error message to display
+     * @param {boolean} isZipError - Whether this is a ZIP code error
      */
-    function showError(message) {
+    function showError(message, isZipError = false) {
+        const errorTitle = document.getElementById('error-title');
+        const errorHint = document.getElementById('error-hint');
+        
         if (errorMessage) errorMessage.textContent = message;
+        
+        if (isZipError) {
+            if (errorTitle) errorTitle.textContent = 'Unsupported ZIP Code';
+            if (errorHint) errorHint.style.display = 'block';
+        } else {
+            if (errorTitle) errorTitle.textContent = 'Oops! Something went wrong';
+            if (errorHint) errorHint.style.display = 'none';
+        }
+        
         showResultState('error');
     }
 

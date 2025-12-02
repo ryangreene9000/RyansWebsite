@@ -119,6 +119,29 @@
             margin-top: 0.25rem;
         }
         
+        .zip-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            line-height: 1.5;
+        }
+        
+        .zip-notice-icon {
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+        
+        .zip-notice strong {
+            color: var(--color-text);
+        }
+        
         .submit-btn {
             width: 100%;
             padding: 1rem 2rem;
@@ -301,7 +324,16 @@
         .result-error p {
             font-size: 0.9375rem;
             color: var(--color-text-muted);
-            margin-bottom: var(--space-lg);
+            margin-bottom: var(--space-md);
+        }
+        
+        .error-hint {
+            font-size: 0.8125rem !important;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            margin-bottom: var(--space-lg) !important;
         }
         
         /* How It Works Section */
@@ -443,12 +475,16 @@
                                     id="zipcode" 
                                     name="zipcode" 
                                     class="form-input" 
-                                    placeholder="e.g., 16801"
+                                    placeholder="e.g., 94070, 94306, 94087"
                                     pattern="[0-9]{5}"
                                     maxlength="5"
                                     required
                                 >
-                                <span class="form-hint">5-digit ZIP code</span>
+                                <span class="form-hint">Bay Area ZIP codes only (California)</span>
+                                <div class="zip-notice">
+                                    <span class="zip-notice-icon">ℹ️</span>
+                                    <span>This estimator currently supports only <strong>Bay Area ZIP codes</strong> (California). Examples: 94070, 94306, 94087, 95124, 94110</span>
+                                </div>
                             </div>
                             
                             <div class="form-row">
@@ -571,8 +607,11 @@
                         <!-- Error State -->
                         <div class="result-error" id="result-error">
                             <div class="result-error-icon">⚠️</div>
-                            <h3>Oops! Something went wrong</h3>
+                            <h3 id="error-title">Oops! Something went wrong</h3>
                             <p id="error-message">Unable to get estimate. Please try again.</p>
+                            <p class="error-hint" id="error-hint" style="display: none;">
+                                Try a Bay Area ZIP code like: 94070, 94306, 94087, 95124, or 94110
+                            </p>
                             <button type="button" class="btn btn-secondary" id="try-again-error">
                                 Try Again
                             </button>

@@ -56,6 +56,7 @@ DATA_PATH = os.path.join(SCRIPT_DIR, 'housing_data.csv')
 MODEL_PATH = os.path.join(SCRIPT_DIR, 'knn_model.pkl')
 SCALER_PATH = os.path.join(SCRIPT_DIR, 'scaler.pkl')
 METADATA_PATH = os.path.join(SCRIPT_DIR, 'model_metadata.json')
+SUPPORTED_ZIPS_PATH = os.path.join(os.path.dirname(SCRIPT_DIR), 'data', 'supported_zipcodes.json')
 
 # Minimum comparable homes for reliable estimate
 MIN_COMPARABLE_HOMES = 50
@@ -88,11 +89,30 @@ housing_df = None
 global_model = None
 global_scaler = None
 model_metadata = None
+supported_zips = set()
+
+
+def load_supported_zips():
+    """Load supported ZIP codes from JSON file or extract from data."""
+    global supported_zips
+    
+    # Try loading from JSON file
+    if os.path.exists(SUPPORTED_ZIPS_PATH):
+        try:
+            with open(SUPPORTED_ZIPS_PATH, 'r') as f:
+                data = json.load(f)
+                supported_zips = set(data.get('zip_codes', []))
+                print(f"✅ Loaded {len(supported_zips)} supported ZIP codes from JSON")
+                return supported_zips
+        except Exception as e:
+            print(f"Error loading supported ZIPs: {e}")
+    
+    return supported_zips
 
 
 def load_housing_data():
     """Load the cleaned housing dataset."""
-    global housing_df
+    global housing_df, supported_zips
     
     if not ML_AVAILABLE or pd is None:
         print("Pandas not available.")
@@ -108,6 +128,11 @@ def load_housing_data():
                     housing_df['property_type']
                     .astype(str).str.lower().str.strip()
                 )
+            
+            # Extract supported ZIP codes from data
+            if 'zip_code' in housing_df.columns:
+                supported_zips = set(housing_df['zip_code'].dropna().unique().astype(int).tolist())
+                print(f"✅ Found {len(supported_zips)} unique ZIP codes in dataset")
             
             print(f"✅ Loaded {len(housing_df)} SFR records from {DATA_PATH}")
             return housing_df
@@ -147,6 +172,7 @@ def load_model():
 
 
 # Load on startup
+load_supported_zips()
 load_housing_data()
 load_model()
 
@@ -397,8 +423,10 @@ def index():
     return jsonify({
         'status': 'API running',
         'version': '3.0.0',
+        'region': 'Bay Area, California',
         'data_loaded': housing_df is not None,
         'records': len(housing_df) if housing_df is not None else 0,
+        'supported_zips': len(supported_zips),
         'model_loaded': global_model is not None,
         'min_comparables': MIN_COMPARABLE_HOMES
     })
@@ -412,6 +440,22 @@ def health():
         'data': 'loaded' if housing_df is not None else 'missing',
         'model': 'loaded' if global_model is not None else 'missing',
         'ml_available': ML_AVAILABLE
+    })
+
+
+@app.route('/supported-zips', methods=['GET'])
+def get_supported_zips():
+    """
+    Returns list of supported Bay Area ZIP codes.
+    This model only works for these California ZIP codes.
+    """
+    zip_list = sorted(list(supported_zips)) if supported_zips else []
+    
+    return jsonify({
+        'region': 'Bay Area, California',
+        'total_zips': len(zip_list),
+        'zip_codes': zip_list,
+        'note': 'This estimator only supports Bay Area (California) ZIP codes.'
     })
 
 
@@ -457,6 +501,14 @@ def predict():
             return jsonify({'error': 'baths must be 0-10'}), 400
         if zip_code and (zip_code < 501 or zip_code > 99950):
             return jsonify({'error': 'Invalid ZIP code'}), 400
+        
+        # Validate ZIP is in supported Bay Area ZIP codes
+        if zip_code and len(supported_zips) > 0 and zip_code not in supported_zips:
+            return jsonify({
+                'error': 'Unsupported ZIP code. This model only supports Bay Area (California) ZIP codes.',
+                'zip_code': zip_code,
+                'supported_count': len(supported_zips)
+            }), 400
         
         # Get estimate
         estimate = None

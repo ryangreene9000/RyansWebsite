@@ -61,8 +61,14 @@ RyansWebsite/
 │       ├── style.css       # Game styles
 │       └── tetris.js       # Game logic
 │
+├── data/
+│   ├── redfin_raw/              # Raw Redfin CSV exports
+│   ├── redfin_clean/            # Cleaned per-ZIP CSVs
+│   └── supported_zipcodes.json  # List of supported Bay Area ZIPs
+│
 └── ml_api/
     ├── app.py              # Flask API
+    ├── redfin_import.py    # Redfin CSV import script
     ├── requirements.txt    # Dependencies
     ├── runtime.txt         # Python version
     └── README.md           # API documentation
@@ -121,6 +127,58 @@ Classic block-stacking puzzle game built with vanilla JavaScript and HTML5 Canva
 - Mobile touch controls
 
 **Location:** `/games/tetris/`
+
+---
+
+## Housing Price Estimator
+
+### Supported ZIP Codes
+
+This model is trained exclusively on **Bay Area (California)** housing data using CSV exports from Redfin. The estimator only supports ZIP codes present in the Bay Area, including but not limited to:
+
+| Region | ZIP Code Range |
+|--------|----------------|
+| **San Francisco** | 94102–94134 |
+| **San Mateo County** | 94002–94080 |
+| **Santa Clara County** | 94022–95126 |
+| **Alameda & Contra Costa** | 94501–94808 |
+
+At runtime, the app automatically rejects unsupported ZIP codes and displays a friendly error message.
+
+This ensures the model remains accurate because it is trained on **real sold-home data** from the region.
+
+### Importing Redfin Data
+
+To update the model with new Redfin data:
+
+1. **Download a Redfin CSV:**
+   - Go to [Redfin.com](https://www.redfin.com)
+   - Search for homes in a Bay Area city
+   - Filter to "Sold" homes
+   - Click "Download All" to export CSV
+
+2. **Place the CSV in the data folder:**
+   ```bash
+   cp ~/Downloads/redfin_*.csv data/redfin_raw/
+   ```
+
+3. **Run the import script:**
+   ```bash
+   cd ml_api
+   python redfin_import.py
+   ```
+
+4. **Retrain the model (if train_model.py exists):**
+   ```bash
+   python train_model.py
+   ```
+
+The import script will:
+- Filter to single-family homes only
+- Filter to SOLD homes only
+- Clean and validate data
+- Generate `data/supported_zipcodes.json`
+- Update `ml_api/housing_data.csv`
 
 ---
 

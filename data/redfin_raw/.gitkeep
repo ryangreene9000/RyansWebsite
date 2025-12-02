@@ -1,0 +1,3 @@
+# Place Redfin CSV exports here
+# Then run: python ml_api/redfin_import.py
+
