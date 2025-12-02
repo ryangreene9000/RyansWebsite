@@ -38,6 +38,8 @@
         
         /* Header */
         .game-header {
+            position: relative;
+            z-index: 100;
             padding: 1rem 2rem;
             background: var(--color-bg-alt);
             border-bottom: 1px solid var(--color-border);
@@ -54,6 +56,7 @@
             text-decoration: none;
             font-size: 0.9375rem;
             transition: color 0.2s;
+            pointer-events: auto;
         }
         
         .back-link:hover {
