@@ -85,6 +85,74 @@ RyansWebsite/
 | **Estimator** | ML-powered housing price estimator |
 | **Contact** | Contact info and message form |
 
+## Projects
+
+### AI-Powered Contract Change Detection Pipeline
+🏆 **1st Place — FINRA 2025 Creatathon**
+
+A serverless NLP pipeline that analyzes regulatory contracts, detects semantic changes, and automates compliance workflows. Uses AWS Lambda, Step Functions, DynamoDB, and OpenAI embeddings for semantic diffing. Reduced manual review time by 80%.
+
+**Tech:** AWS Lambda, Step Functions, DynamoDB, S3, Python, OpenAI Embeddings
+
+---
+
+### AWS Serverless Valve Automation System
+*Capstone Project*
+
+A distributed AWS-based automation system for monitoring and validating utility valve states in real time. Designed for WSSC Water with workflow automation, email notifications, and audit logging.
+
+**Tech:** Java, AWS Lambda, EC2, S3, DynamoDB, Step Functions
+
+---
+
+### Pipelined 32-bit CPU in Verilog
+
+A fully synthesizable 5-stage pipelined CPU implementing a subset of MIPS with hazard detection, forwarding, and branch handling. Designed IF/ID/EX/MEM/WB pipeline stages, ALU, register file, and control unit.
+
+**Tech:** Verilog, Vivado, FPGA, Digital Logic
+
+---
+
+### Real-Time Embedded Systems on HCS12
+
+A collection of embedded programs for the HCS12 microcontroller including real-time 8kHz audio sampling, waveform synthesis, 7-segment display drivers, and UART command interfaces. Achieved deterministic timing with optimized ISR latencies.
+
+**Tech:** HCS12 Assembly, Timers, RTI Interrupts, ADC, UART
+
+---
+
+### Raspberry Pi Networked Sensor Dashboard
+
+A Python-based sensor visualization system on Raspberry Pi with real-time dashboard, joystick control, LED matrix output, and TCP/IP communication. Visualizes accelerometer, temperature, and humidity data.
+
+**Tech:** Python, Tkinter, Raspberry Pi, SenseHAT, TCP Sockets
+
+---
+
+### CPU Microarchitecture Design-Space Exploration
+
+A parametric performance study exploring 18 CPU tuning knobs including fetch width, ALU count, cache parameters, and branch predictors. Automated simulation experiments in SimpleScalar across hundreds of configurations.
+
+**Tech:** C++, SimpleScalar, Shell Scripting, Performance Analysis
+
+---
+
+### Custom Memory Management System
+
+A full custom allocator implementing malloc, calloc, free, and realloc using a simulated heap with 16-byte alignment. Features free-list management, block splitting, coalescing, and error handling.
+
+**Tech:** C, Memory Management, Bitwise Operations
+
+---
+
+### Threaded Channel Synchronization System
+
+A concurrency messaging system with blocking/non-blocking reads/writes using condition variables and mutex-protected queues. Inspired by Go's CSP model with FIFO ordering and deadlock prevention.
+
+**Tech:** C, pthreads, Mutexes, Condition Variables
+
+---
+
 ## Games
 
 ### Minesweeper

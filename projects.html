@@ -166,6 +166,16 @@
             color: #22c55e;
         }
         
+        .category-cloud {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+        
+        .category-iot {
+            background: rgba(6, 182, 212, 0.1);
+            color: #06b6d4;
+        }
+        
         .project-card-description {
             font-size: 0.9375rem;
             color: var(--color-text-muted);
@@ -282,6 +292,7 @@
                 <div class="filter-tabs">
                     <button class="filter-tab active" data-filter="all">All Projects</button>
                     <button class="filter-tab" data-filter="ai">AI / ML</button>
+                    <button class="filter-tab" data-filter="cloud">Cloud</button>
                     <button class="filter-tab" data-filter="systems">Systems</button>
                     <button class="filter-tab" data-filter="embedded">Embedded</button>
                     <button class="filter-tab" data-filter="digital">Digital Design</button>
@@ -301,22 +312,24 @@
                         </div>
                         <div class="project-card-content">
                             <div class="project-card-header">
-                                <h3 class="project-card-title">AI Contract Change Detection System</h3>
-                                <span class="project-card-category category-ai">AI / AWS</span>
+                                <h3 class="project-card-title">AI-Powered Contract Change Detection Pipeline</h3>
+                                <span class="project-card-category category-ai">AI / Cloud</span>
                             </div>
                             <p class="project-card-description">
                                 <strong>🏆 1st Place — FINRA 2025 Creatathon</strong><br><br>
-                                Automated clause-level comparison of vendor contracts using LLM technology. 
-                                Built a serverless pipeline that scraped vendor terms & conditions, ran semantic 
-                                comparisons using Claude LLM, and flagged high-risk changes. Reduced manual 
-                                review time from <strong>100+ hours to 25 hours</strong>.
+                                A serverless NLP pipeline that analyzes regulatory contracts, detects semantic changes, 
+                                and automates compliance workflows. The system uses multi-stage Lambdas orchestrated by 
+                                Step Functions, stores metadata in DynamoDB, and leverages OpenAI embeddings for semantic 
+                                diffing. Features text extraction, contract change classification, and asynchronous 
+                                pipeline execution with error recovery. <strong>Reduced manual review by 80%</strong>.
                             </p>
                             <div class="project-card-tags">
                                 <span class="tag tag-primary">AWS Lambda</span>
-                                <span class="tag">DynamoDB</span>
                                 <span class="tag">Step Functions</span>
+                                <span class="tag">DynamoDB</span>
+                                <span class="tag">S3</span>
                                 <span class="tag">Python</span>
-                                <span class="tag tag-accent">Claude LLM</span>
+                                <span class="tag tag-accent">OpenAI Embeddings</span>
                             </div>
                         </div>
                     </article>
@@ -392,44 +405,48 @@
                         </div>
                         <div class="project-card-content">
                             <div class="project-card-header">
-                                <h3 class="project-card-title">Pipelined 5-Stage MIPS Processor</h3>
-                                <span class="project-card-category category-digital">Digital Design</span>
+                                <h3 class="project-card-title">Pipelined 32-bit CPU in Verilog</h3>
+                                <span class="project-card-category category-digital">Hardware</span>
                             </div>
                             <p class="project-card-description">
-                                Complete 5-stage pipelined MIPS CPU implementation in Verilog. Supports ~20 MIPS 
-                                instructions with data forwarding, hazard detection, and instruction memory. 
-                                Synthesized and tested on FPGA using Vivado.
+                                A fully synthesizable 5-stage pipelined CPU implementing a subset of MIPS with 
+                                hazard detection, data forwarding, and branch handling. Designed and implemented 
+                                IF/ID/EX/MEM/WB pipeline stages, ALU, register file, control unit, and forwarding 
+                                logic. Features instruction-level parallelism with proper pipeline state handling.
                             </p>
                             <div class="project-card-tags">
                                 <span class="tag tag-primary">Verilog</span>
                                 <span class="tag">Vivado</span>
                                 <span class="tag">FPGA</span>
-                                <span class="tag">Computer Architecture</span>
+                                <span class="tag">CPU Design</span>
+                                <span class="tag">Digital Logic</span>
                             </div>
                         </div>
                     </article>
 
-                    <!-- HCS12 Waveform Generator -->
+                    <!-- HCS12 Embedded Systems -->
                     <article class="project-card reveal" id="hcs12" data-category="embedded">
                         <div class="project-card-image">
                             <span class="placeholder-icon">📟</span>
                         </div>
                         <div class="project-card-content">
                             <div class="project-card-header">
-                                <h3 class="project-card-title">HCS12 Waveform Generator + 24hr Clock</h3>
+                                <h3 class="project-card-title">Real-Time Embedded Systems on HCS12</h3>
                                 <span class="project-card-category category-embedded">Embedded</span>
                             </div>
                             <p class="project-card-description">
-                                Real-time embedded system on HCS12 microcontroller featuring ADC sampling, 
-                                interrupt-driven waveform generation, UART control interface, and a 24-hour 
-                                real-time clock display. Programmed in Assembly and C.
+                                A collection of embedded programs for the HCS12 microcontroller including real-time 
+                                audio sampling at 8kHz, waveform synthesis, 7-segment display drivers, timer interrupts, 
+                                and UART-driven command interfaces. Implemented deterministic timing guarantees with 
+                                optimized ISR latencies using RTI interrupts and ADC.
                             </p>
                             <div class="project-card-tags">
                                 <span class="tag tag-primary">HCS12</span>
                                 <span class="tag">Assembly</span>
-                                <span class="tag">C</span>
-                                <span class="tag">UART</span>
+                                <span class="tag">Timers</span>
+                                <span class="tag">RTI Interrupts</span>
                                 <span class="tag">ADC</span>
+                                <span class="tag">UART</span>
                             </div>
                         </div>
                     </article>
@@ -441,17 +458,19 @@
                         </div>
                         <div class="project-card-content">
                             <div class="project-card-header">
-                                <h3 class="project-card-title">Custom Memory Allocator</h3>
+                                <h3 class="project-card-title">Custom Memory Management System</h3>
                                 <span class="project-card-category category-systems">Systems</span>
                             </div>
                             <p class="project-card-description">
-                                Implementation of malloc, realloc, and free in C. Uses segmented memory management 
-                                with bitwise metadata, free lists, and 16-byte alignment. Designed for efficient 
-                                memory utilization and fragmentation prevention.
+                                A full custom allocator implementing malloc, calloc, free, and realloc using a 
+                                simulated heap with 16-byte alignment and bitwise metadata tracking. Features 
+                                free-list management, block splitting, coalescing, and heap extension via 
+                                mem_sbrk simulation. Includes deterministic block metadata layout and error handling.
                             </p>
                             <div class="project-card-tags">
                                 <span class="tag tag-primary">C</span>
                                 <span class="tag">Memory Management</span>
+                                <span class="tag">Bitwise Operations</span>
                                 <span class="tag">Systems Programming</span>
                             </div>
                         </div>
@@ -464,19 +483,100 @@
                         </div>
                         <div class="project-card-content">
                             <div class="project-card-header">
-                                <h3 class="project-card-title">Thread-Safe Channel Sync Library</h3>
+                                <h3 class="project-card-title">Threaded Channel Synchronization System</h3>
                                 <span class="project-card-category category-systems">Systems</span>
                             </div>
                             <p class="project-card-description">
-                                Full channel-based IPC system in C using pthreads. Features blocking and 
-                                non-blocking sends/receives, mutex locks, condition variables, and message 
-                                queueing. Inspired by Go's channel model.
+                                A concurrency messaging system implementing blocking and non-blocking reads/writes 
+                                using condition variables and mutex-protected queues. Built a thread-safe channel 
+                                abstraction inspired by Go's CSP model, supporting multiple producers and consumers 
+                                with FIFO ordering and deadlock prevention.
                             </p>
                             <div class="project-card-tags">
                                 <span class="tag tag-primary">C</span>
                                 <span class="tag">pthreads</span>
+                                <span class="tag">Mutexes</span>
+                                <span class="tag">Condition Variables</span>
                                 <span class="tag">Concurrency</span>
-                                <span class="tag">IPC</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- AWS Valve Automation System -->
+                    <article class="project-card reveal" id="valve-automation" data-category="cloud">
+                        <div class="project-card-image">
+                            <span class="placeholder-icon">☁️</span>
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-card-header">
+                                <h3 class="project-card-title">AWS Serverless Valve Automation System</h3>
+                                <span class="project-card-category category-cloud">Cloud</span>
+                            </div>
+                            <p class="project-card-description">
+                                A distributed AWS-based automation system for monitoring and validating utility 
+                                valve states in real time. Designed for WSSC Water to monitor valve operations, 
+                                validate field data, and trigger automated workflows. Features operational 
+                                workflow automation, email notifications, audit logging, and backend integrations.
+                            </p>
+                            <div class="project-card-tags">
+                                <span class="tag tag-primary">Java</span>
+                                <span class="tag">AWS Lambda</span>
+                                <span class="tag">EC2</span>
+                                <span class="tag">DynamoDB</span>
+                                <span class="tag">Step Functions</span>
+                                <span class="tag">S3</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Raspberry Pi Sensor Dashboard -->
+                    <article class="project-card reveal" id="rpi-dashboard" data-category="embedded">
+                        <div class="project-card-image">
+                            <span class="placeholder-icon">🍓</span>
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-card-header">
+                                <h3 class="project-card-title">Raspberry Pi Networked Sensor Dashboard</h3>
+                                <span class="project-card-category category-iot">IoT</span>
+                            </div>
+                            <p class="project-card-description">
+                                A Python-based sensor visualization system on Raspberry Pi with real-time dashboard, 
+                                joystick control, LED matrix output, and TCP/IP communication. Visualizes accelerometer, 
+                                temperature, and humidity data in real time. Features remote monitoring and socket 
+                                communication between devices.
+                            </p>
+                            <div class="project-card-tags">
+                                <span class="tag tag-primary">Python</span>
+                                <span class="tag">Raspberry Pi</span>
+                                <span class="tag">Tkinter</span>
+                                <span class="tag">SenseHAT</span>
+                                <span class="tag">TCP Sockets</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- CPU Design Space Exploration -->
+                    <article class="project-card reveal" id="simplescalar" data-category="digital">
+                        <div class="project-card-image">
+                            <span class="placeholder-icon">📊</span>
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-card-header">
+                                <h3 class="project-card-title">CPU Microarchitecture Design-Space Exploration</h3>
+                                <span class="project-card-category category-digital">Hardware</span>
+                            </div>
+                            <p class="project-card-description">
+                                A parametric performance study of CPU microarchitecture exploring 18 tuning knobs 
+                                including fetch width, ALU count, cache parameters, and branch predictors. Automated 
+                                simulation experiments in SimpleScalar across hundreds of configurations. Evaluated 
+                                performance, energy, and EDP metrics to find optimal design points.
+                            </p>
+                            <div class="project-card-tags">
+                                <span class="tag tag-primary">C++</span>
+                                <span class="tag">SimpleScalar</span>
+                                <span class="tag">Shell Scripting</span>
+                                <span class="tag">Performance Analysis</span>
+                                <span class="tag">CPU Design</span>
                             </div>
                         </div>
                     </article>
