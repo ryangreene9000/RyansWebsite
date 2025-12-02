@@ -22,6 +22,21 @@
     const CELL_SIZE = 20;
     const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
     
+    // ============================================
+    // Movement Speed Configuration
+    // ============================================
+    // MOVE_DELAY controls the base speed (higher = slower)
+    // All speed settings are multipliers of this base delay
+    const MOVE_DELAY = 200; // Base movement delay in milliseconds
+    
+    // Speed settings (ms per tick) - centralized for easy tuning
+    // Slow: 40% slower than base, Normal: base speed, Fast: 40% faster than base
+    const SPEEDS = {
+        slow: Math.round(MOVE_DELAY * 1.4),    // 280ms - very relaxed pace
+        normal: MOVE_DELAY,                      // 200ms - comfortable default
+        fast: Math.round(MOVE_DELAY * 0.6)      // 120ms - challenging but playable
+    };
+    
     // Colors
     const COLORS = {
         background: '#1a1a2e',
@@ -31,13 +46,6 @@
         snakeGlow: 'rgba(34, 197, 94, 0.3)',
         food: '#ef4444',
         foodGlow: 'rgba(239, 68, 68, 0.4)'
-    };
-
-    // Speed settings (ms per tick)
-    const SPEEDS = {
-        slow: 150,
-        normal: 100,
-        fast: 60
     };
 
     // Directions
