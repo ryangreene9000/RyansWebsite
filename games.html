@@ -303,6 +303,14 @@
         /* Game Card Actions */
         .game-card-actions {
             margin-top: var(--space-md);
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+        
+        .game-card-actions .btn {
+            flex: 1;
+            min-width: fit-content;
         }
         
         .game-card-title {
@@ -558,6 +566,7 @@
                             </p>
                             <div class="game-card-actions">
                                 <a href="/games/tetris/" class="btn btn-primary btn-sm">🎮 Play Now</a>
+                                <a href="https://github.com/ryangreene9000" class="btn btn-secondary btn-sm" target="_blank">View Code</a>
                             </div>
                         </div>
                     </article>
