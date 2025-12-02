@@ -9,7 +9,7 @@ A modern, recruiter-ready developer portfolio website with a Flask ML API backen
 This repository contains:
 - **Static Frontend** - Modern portfolio website (HTML/CSS/JS) for GitHub Pages
 - **Flask ML API** - Housing price estimator backend for Render deployment
-- **Browser Games** - Minesweeper and Tetris playable in the browser
+- **Browser Games** - Minesweeper, Tetris, and Snake playable in the browser
 
 ## Quick Start
 
@@ -49,6 +49,7 @@ RyansWebsite/
 ├── assets/
 │   ├── favicon.svg         # Site favicon
 │   ├── tetris.svg          # Tetris thumbnail
+│   ├── snake.svg           # Snake thumbnail
 │   └── placeholder.svg     # Placeholder image
 │
 ├── games/
@@ -56,10 +57,15 @@ RyansWebsite/
 │   │   ├── index.html      # Game page
 │   │   └── minesweeper.js  # Game logic
 │   │
-│   └── tetris/             # Tetris game
+│   ├── tetris/             # Tetris game
+│   │   ├── index.html      # Game page
+│   │   ├── style.css       # Game styles
+│   │   └── tetris.js       # Game logic
+│   │
+│   └── snake/              # Snake game
 │       ├── index.html      # Game page
 │       ├── style.css       # Game styles
-│       └── tetris.js       # Game logic
+│       └── snake.js        # Game logic
 │
 ├── data/
 │   ├── redfin_raw/              # Raw Redfin CSV exports
@@ -81,7 +87,7 @@ RyansWebsite/
 | **Home** | Hero section, featured projects, skills preview |
 | **About** | Full bio, skills, education, experience, interests |
 | **Projects** | Filterable project grid with detailed cards |
-| **Games** | Playable games including Minesweeper and Tetris |
+| **Games** | Playable games including Minesweeper, Tetris, and Snake |
 | **Estimator** | ML-powered housing price estimator |
 | **Contact** | Contact info and message form |
 
@@ -195,6 +201,29 @@ Classic block-stacking puzzle game built with vanilla JavaScript and HTML5 Canva
 - Mobile touch controls
 
 **Location:** `/games/tetris/`
+
+---
+
+### Snake
+
+Classic arcade Snake game built with vanilla JavaScript and HTML5 Canvas.
+
+**How to Play:**
+- **↑ ↓ ← →** or **W A S D** — Move the snake
+- **P** — Pause game
+- **R** — Restart game
+- Eat food to grow longer
+- Avoid hitting walls or your own body
+
+**Features:**
+- Smooth snake movement and animations
+- Score tracking with high score persistence (localStorage)
+- Multiple speed settings (Slow, Normal, Fast)
+- Mobile touch controls (swipe + buttons)
+- Eyes that follow movement direction
+- Responsive design
+
+**Location:** `/games/snake/`
 
 ---
 

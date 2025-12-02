@@ -313,6 +313,55 @@
             min-width: fit-content;
         }
         
+        /* Snake Preview */
+        .snake-preview {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .snake-segment {
+            width: 24px;
+            height: 24px;
+            background: #16a34a;
+            border-radius: 4px;
+        }
+        
+        .snake-segment.snake-head {
+            background: #22c55e;
+            position: relative;
+        }
+        
+        .snake-segment.snake-head::before,
+        .snake-segment.snake-head::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            top: 6px;
+        }
+        
+        .snake-segment.snake-head::before {
+            left: 4px;
+        }
+        
+        .snake-segment.snake-head::after {
+            right: 4px;
+        }
+        
+        .snake-food {
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            border-radius: 50%;
+            margin-left: 20px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
         .game-card-title {
             font-size: 1.125rem;
             margin-bottom: var(--space-sm);
@@ -570,6 +619,31 @@
                             </div>
                         </div>
                     </article>
+                    
+                    <!-- Snake - Playable -->
+                    <article class="game-card reveal">
+                        <div class="game-card-image" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+                            <div class="snake-preview">
+                                <div class="snake-segment snake-head"></div>
+                                <div class="snake-segment"></div>
+                                <div class="snake-segment"></div>
+                                <div class="snake-segment"></div>
+                                <div class="snake-food"></div>
+                            </div>
+                        </div>
+                        <div class="game-card-content">
+                            <span class="game-card-status status-playable">Playable</span>
+                            <h3 class="game-card-title">Snake</h3>
+                            <p class="game-card-description">
+                                A classic Snake game built using HTML, CSS, and JavaScript. 
+                                Eat food to grow longer, avoid walls and your own tail!
+                            </p>
+                            <div class="game-card-actions">
+                                <a href="/games/snake/" class="btn btn-primary btn-sm">🎮 Play Now</a>
+                                <a href="https://github.com/ryangreene9000" class="btn btn-secondary btn-sm" target="_blank">View Code</a>
+                            </div>
+                        </div>
+                    </article>
                 </div>
 
             </div>
@@ -616,9 +690,9 @@
                 <div class="footer-column">
                     <h4>Projects</h4>
                     <ul>
-                        <li><a href="/projects.html#ai-contract">AI Contract Detector</a></li>
                         <li><a href="/games/minesweeper/">Minesweeper</a></li>
                         <li><a href="/games/tetris/">Tetris</a></li>
+                        <li><a href="/games/snake/">Snake</a></li>
                         <li><a href="/realestate.html">ML Estimator</a></li>
                     </ul>
                 </div>

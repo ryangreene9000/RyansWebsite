@@ -1,0 +1,336 @@
+/**
+ * Snake Game Styles
+ * Matches the overall site aesthetic
+ */
+
+/* Game Page Layout */
+.game-page {
+    padding: var(--space-3xl) 0;
+    min-height: calc(100vh - 200px);
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: var(--space-md);
+    transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+
+.game-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-xs);
+}
+
+.game-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+}
+
+/* Game Layout */
+.game-layout {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2xl);
+    flex-wrap: wrap;
+}
+
+/* Game Container */
+.game-container {
+    flex-shrink: 0;
+}
+
+.game-wrapper {
+    position: relative;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
+}
+
+#snake-canvas {
+    display: block;
+    background: #1a1a2e;
+    border-radius: var(--radius-md);
+}
+
+/* Game Overlay */
+.game-overlay {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+    right: var(--space-md);
+    bottom: var(--space-md);
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity var(--transition-normal);
+}
+
+.game-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-content {
+    text-align: center;
+    color: #fff;
+}
+
+.overlay-content h2 {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+    color: #22c55e;
+}
+
+.overlay-content p {
+    margin-bottom: var(--space-lg);
+    color: #ccc;
+}
+
+/* Sidebar */
+.game-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-width: 200px;
+    max-width: 280px;
+}
+
+/* Stats Panel */
+.stats-panel {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #22c55e;
+    font-family: var(--font-mono);
+}
+
+/* Speed Panel */
+.speed-panel {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+}
+
+.speed-panel h3 {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.speed-buttons {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.speed-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.speed-btn:hover {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.speed-btn.active {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: white;
+}
+
+/* Controls Panel */
+.controls-panel {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.controls-panel .btn {
+    flex: 1;
+}
+
+/* Instructions Panel */
+.instructions-panel {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+}
+
+.instructions-panel h3 {
+    font-size: 1rem;
+    margin-bottom: var(--space-md);
+    color: var(--color-text);
+}
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-md) 0;
+}
+
+.instructions-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.instructions-list kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    min-width: 24px;
+    text-align: center;
+}
+
+.instructions-tip {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border);
+}
+
+/* Mobile Controls */
+.mobile-controls {
+    display: none;
+    flex-direction: column;
+    gap: var(--space-sm);
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+}
+
+.mobile-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+}
+
+.mobile-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-alt);
+    border: 2px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-btn:active {
+    background: #22c55e;
+    color: white;
+    transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .game-sidebar {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    #snake-canvas {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    .mobile-controls {
+        display: flex;
+    }
+
+    .instructions-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 400px) {
+    .game-header h1 {
+        font-size: 2rem;
+    }
+
+    .stats-panel {
+        padding: var(--space-md);
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+    }
+
+    .mobile-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+
