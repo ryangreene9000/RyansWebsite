@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apple CarPlay / Raspberry Pi Infotainment System - A custom embedded project by Ryan Greene featuring touchscreen UI, Bluetooth audio, and navigation.">
+    <title>CarPlay Project | Ryan Greene</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/styles/global.css">
+    
+    <style>
+        /* ============================================
+           CARPLAY PROJECT PAGE STYLES
+           ============================================ */
+        
+        /* Hero Section */
+        .project-hero {
+            padding: var(--space-4xl) 0 var(--space-3xl);
+            background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(13, 148, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .project-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .project-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 0.5rem 1rem;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--color-primary);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .project-hero h1 {
+            margin-bottom: var(--space-md);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .project-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
+            max-width: 600px;
+            margin: 0 auto var(--space-xl);
+        }
+        
+        .project-hero-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-lg);
+            display: block;
+        }
+        
+        /* Section Styles */
+        .project-section {
+            padding: var(--space-3xl) 0;
+        }
+        
+        .project-section:nth-child(even) {
+            background: var(--color-bg-alt);
+        }
+        
+        .section-title {
+            font-size: 1.75rem;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .section-title-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* Overview Section */
+        .overview-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-2xl);
+            align-items: start;
+        }
+        
+        .overview-text p {
+            margin-bottom: var(--space-md);
+            line-height: 1.8;
+        }
+        
+        .overview-highlight {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            border-left: 4px solid var(--color-primary);
+        }
+        
+        .overview-highlight h4 {
+            color: var(--color-primary);
+            margin-bottom: var(--space-sm);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .overview-highlight p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+        
+        /* Tech Stack Section */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-lg);
+        }
+        
+        .tech-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            text-align: center;
+            transition: var(--transition-base);
+        }
+        
+        .tech-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        
+        .tech-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-md);
+            display: block;
+        }
+        
+        .tech-card h4 {
+            font-size: 1.125rem;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .tech-card p {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-lg);
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            transition: var(--transition-base);
+        }
+        
+        .feature-item:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .feature-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: var(--radius-md);
+        }
+        
+        .feature-content h4 {
+            font-size: 1rem;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .feature-content p {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        /* Poster Section */
+        .poster-section {
+            background: var(--color-bg);
+        }
+        
+        .poster-container {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .poster-embed {
+            width: 100%;
+            height: 800px;
+            border: none;
+            display: block;
+        }
+        
+        .poster-actions {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+        }
+        
+        /* GitHub Section */
+        .github-section {
+            text-align: center;
+            padding: var(--space-3xl) 0;
+            background: linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-bg) 100%);
+        }
+        
+        .github-card {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-lg);
+            padding: var(--space-2xl);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-xl);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .github-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--color-text);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-bg);
+        }
+        
+        .github-card h3 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .github-card p {
+            text-align: center;
+            margin: 0;
+        }
+        
+        .github-note {
+            font-size: 0.75rem;
+            color: var(--color-text-light);
+            margin-top: var(--space-sm);
+        }
+        
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--color-text-muted);
+            font-size: 0.9375rem;
+            margin-bottom: var(--space-xl);
+            transition: var(--transition-fast);
+        }
+        
+        .back-link:hover {
+            color: var(--color-primary);
+        }
+        
+        .back-link svg {
+            transition: var(--transition-fast);
+        }
+        
+        .back-link:hover svg {
+            transform: translateX(-4px);
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .tech-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .overview-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .poster-embed {
+                height: 500px;
+            }
+            
+            .poster-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .project-hero h1 {
+                font-size: 1.75rem;
+            }
+            
+            .project-subtitle {
+                font-size: 1rem;
+            }
+            
+            .poster-embed {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="navbar-logo">
+                <span class="logo-icon">RG</span>
+                <span>Ryan Greene</span>
+            </a>
+            
+            <ul class="navbar-nav" id="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/about.html" class="nav-link">About</a></li>
+                <li><a href="/projects.html" class="nav-link">Projects</a></li>
+                <li><a href="/carplay.html" class="nav-link active">CarPlay Project</a></li>
+                <li><a href="/games.html" class="nav-link">Games</a></li>
+                <li><a href="/realestate.html" class="nav-link">Estimator</a></li>
+                <li><a href="/contact.html" class="nav-link nav-cta">Contact</a></li>
+            </ul>
+            
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </button>
+            
+            <button class="navbar-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="project-hero">
+            <div class="container">
+                <div class="project-hero-content">
+                    <!-- Back to Projects Link -->
+                    <a href="/projects.html" class="back-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Back to Projects
+                    </a>
+                    
+                    <span class="project-hero-icon">🚗</span>
+                    <span class="project-badge">
+                        <span>🍓</span>
+                        Embedded Systems / IoT
+                    </span>
+                    <h1>Apple CarPlay / Raspberry Pi Infotainment System</h1>
+                    <p class="project-subtitle">
+                        A custom Raspberry Pi–based infotainment system featuring a CarPlay-style touchscreen interface, 
+                        Bluetooth audio, and navigation capabilities.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Overview Section -->
+        <section class="project-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <span class="section-title-icon">📋</span>
+                    Project Overview
+                </h2>
+                <div class="overview-content">
+                    <div class="overview-text">
+                        <p>
+                            This project addresses the challenge of outdated vehicle infotainment systems by creating 
+                            a modern, cost-effective alternative using a Raspberry Pi 5. Many older vehicles lack 
+                            smartphone integration features like Apple CarPlay, leaving drivers with limited options 
+                            for navigation, music, and hands-free communication.
+                        </p>
+                        <p>
+                            The system provides a CarPlay-inspired touchscreen interface that integrates seamlessly 
+                            with the vehicle's existing audio system via Bluetooth. Built with Python and Flask, 
+                            it features a modular software architecture that makes it easy to extend with additional 
+                            functionality.
+                        </p>
+                        <p>
+                            This custom embedded + software project demonstrates the intersection of hardware 
+                            integration, UI/UX design, and systems programming to deliver a polished, 
+                            production-ready infotainment experience.
+                        </p>
+                    </div>
+                    <div class="overview-highlight">
+                        <h4>Key Problem Solved</h4>
+                        <p>
+                            Bringing modern infotainment capabilities to vehicles without native CarPlay support, 
+                            at a fraction of the cost of aftermarket head unit replacements.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Stack Section -->
+        <section class="project-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <span class="section-title-icon">🛠️</span>
+                    Technical Stack
+                </h2>
+                <div class="tech-grid">
+                    <div class="tech-card reveal">
+                        <span class="tech-icon">🍓</span>
+                        <h4>Raspberry Pi 5</h4>
+                        <p>Powerful single-board computer serving as the system's brain</p>
+                    </div>
+                    <div class="tech-card reveal">
+                        <span class="tech-icon">🐍</span>
+                        <h4>Python</h4>
+                        <p>Primary programming language for application logic</p>
+                    </div>
+                    <div class="tech-card reveal">
+                        <span class="tech-icon">🌐</span>
+                        <h4>Flask</h4>
+                        <p>Lightweight web framework for the touchscreen interface</p>
+                    </div>
+                    <div class="tech-card reveal">
+                        <span class="tech-icon">📺</span>
+                        <h4>Touchscreen Display</h4>
+                        <p>High-resolution capacitive touchscreen for user interaction</p>
+                    </div>
+                    <div class="tech-card reveal">
+                        <span class="tech-icon">🔊</span>
+                        <h4>Bluetooth Audio</h4>
+                        <p>Wireless audio streaming to vehicle speakers</p>
+                    </div>
+                    <div class="tech-card reveal">
+                        <span class="tech-icon">🎛️</span>
+                        <h4>Sense HAT</h4>
+                        <p>Environmental sensors and LED matrix for status display</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section class="project-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <span class="section-title-icon">✨</span>
+                    Key Features
+                </h2>
+                <div class="features-grid">
+                    <div class="feature-item reveal">
+                        <div class="feature-icon">📱</div>
+                        <div class="feature-content">
+                            <h4>CarPlay-Style Touchscreen UI</h4>
+                            <p>Intuitive, visually appealing interface inspired by Apple CarPlay's design language</p>
+                        </div>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="feature-icon">🎵</div>
+                        <div class="feature-content">
+                            <h4>Music Playback & Bluetooth Audio</h4>
+                            <p>Stream music wirelessly to your vehicle's existing audio system</p>
+                        </div>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="feature-icon">🗺️</div>
+                        <div class="feature-content">
+                            <h4>Navigation Interface</h4>
+                            <p>Built-in navigation capabilities with turn-by-turn directions</p>
+                        </div>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="feature-icon">🔌</div>
+                        <div class="feature-content">
+                            <h4>Embedded System Design</h4>
+                            <p>Optimized for low-power, always-on operation in a vehicle environment</p>
+                        </div>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="feature-icon">🧩</div>
+                        <div class="feature-content">
+                            <h4>Modular Software Architecture</h4>
+                            <p>Clean separation of concerns for easy maintenance and extensibility</p>
+                        </div>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="feature-icon">🌡️</div>
+                        <div class="feature-content">
+                            <h4>Environmental Monitoring</h4>
+                            <p>Sense HAT integration for temperature, humidity, and pressure data</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Poster Section -->
+        <section class="project-section poster-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <span class="section-title-icon">📄</span>
+                    Project Poster
+                </h2>
+                <div class="poster-container">
+                    <!-- Embedded PDF Poster -->
+                    <iframe 
+                        class="poster-embed" 
+                        src="/assets/carplay_poster.pdf" 
+                        title="CarPlay Project Poster"
+                        loading="lazy">
+                        <p>Your browser doesn't support PDF viewing. 
+                            <a href="/assets/carplay_poster.pdf" download>Download the poster</a> instead.
+                        </p>
+                    </iframe>
+                </div>
+                <div class="poster-actions">
+                    <a href="/assets/carplay_poster.pdf" class="btn btn-primary" download>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Download Poster (PDF)
+                    </a>
+                    <a href="/assets/carplay_poster.pdf" class="btn btn-secondary" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        Open in New Tab
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- GitHub Section -->
+        <section class="github-section">
+            <div class="container">
+                <div class="github-card reveal">
+                    <div class="github-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </div>
+                    <h3>View Source Code</h3>
+                    <p>Explore the complete codebase including the Flask backend, UI components, and Bluetooth integration.</p>
+                    <!-- Placeholder link - update when repository is available -->
+                    <a href="https://github.com/ryangreene9000/carplay-pi" class="btn btn-primary" target="_blank" rel="noopener">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        View on GitHub
+                    </a>
+                    <p class="github-note">* Repository link will be updated when code is published</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <h3>Ryan Greene</h3>
+                    <p>Computer Engineering student passionate about building scalable systems and intelligent automation.</p>
+                    <div class="footer-social">
+                        <a href="https://github.com/ryangreene9000" target="_blank" rel="noopener" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ryancgreene1" target="_blank" rel="noopener" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="mailto:Ryangreene2091@gmail.com" aria-label="Email">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about.html">About</a></li>
+                        <li><a href="/projects.html">Projects</a></li>
+                        <li><a href="/carplay.html">CarPlay Project</a></li>
+                        <li><a href="/games.html">Games</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/games/minesweeper/">Minesweeper</a></li>
+                        <li><a href="/games/tetris/">Tetris</a></li>
+                        <li><a href="/games/snake/">Snake</a></li>
+                        <li><a href="/realestate.html">ML Estimator</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:Ryangreene2091@gmail.com">Email</a></li>
+                        <li><a href="https://www.linkedin.com/in/ryancgreene1" target="_blank">LinkedIn</a></li>
+                        <li><a href="https://github.com/ryangreene9000" target="_blank">GitHub</a></li>
+                        <li><a href="tel:650-454-4727">Phone</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 Ryan Greene — All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/scripts/main.js"></script>
+</body>
+</html>
+
