@@ -343,9 +343,9 @@ Add new projects in `projects.html` using the project card template.
 ## Contact
 
 - **Email:** Ryangreene2091@gmail.com
-- **Phone:** 650-454-4727
 - **LinkedIn:** [linkedin.com/in/ryancgreene1](https://linkedin.com/in/ryancgreene1)
 - **GitHub:** [github.com/ryangreene9000](https://github.com/ryangreene9000)
+<!-- Phone number removed for privacy reasons -->
 
 ## License
 
