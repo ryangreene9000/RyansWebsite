@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EE Projects by Ryan Greene - High-speed digital design, signal integrity, power integrity, and electrical engineering.">
+    <title>EE Projects | Ryan Greene</title>
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="stylesheet" href="/styles/global.css">
+    
+    <style>
+        /* EE Projects Page Specific Styles */
+        .projects-hero {
+            padding: var(--space-4xl) 0 var(--space-2xl);
+            text-align: center;
+            background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
+        }
+        
+        .projects-hero h1 {
+            margin-bottom: var(--space-md);
+        }
+        
+        .projects-hero p {
+            font-size: 1.125rem;
+            margin: 0 auto;
+        }
+        
+        .projects-section {
+            padding: var(--space-3xl) 0;
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-xl);
+            align-items: start;
+        }
+        
+        .project-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border-light);
+            overflow: hidden;
+            transition: var(--transition-base);
+        }
+        
+        .project-card:hover {
+            border-color: transparent;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-6px);
+        }
+        
+        .project-card-image {
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-border-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-card-image .placeholder-icon {
+            font-size: 3.5rem;
+            opacity: 0.6;
+        }
+        
+        .project-card-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .project-card-content {
+            padding: var(--space-xl);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .project-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+        
+        .project-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        
+        .project-card-category {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius-full);
+            white-space: nowrap;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .project-card-description {
+            font-size: 0.9375rem;
+            color: var(--color-text-muted);
+            line-height: 1.7;
+            margin-bottom: var(--space-md);
+        }
+        
+        .project-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xs);
+            margin-top: auto;
+        }
+        
+        .project-highlights {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 var(--space-md) 0;
+            font-size: 0.85rem;
+        }
+        
+        .project-highlights li {
+            position: relative;
+            padding-left: 1.25rem;
+            margin-bottom: 0.375rem;
+            color: var(--color-text-muted);
+        }
+        
+        .project-highlights li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+        
+        .project-card-actions {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+        
+        .project-card-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .project-card-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="navbar-logo">
+                <span class="logo-icon">RG</span>
+                <span>Ryan Greene</span>
+            </a>
+            
+            <ul class="navbar-nav" id="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/about.html" class="nav-link">About</a></li>
+                <li><a href="/projects.html" class="nav-link active">Projects</a></li>
+                <li><a href="/carplay.html" class="nav-link">CarPlay Project</a></li>
+                <li><a href="/games.html" class="nav-link">Games</a></li>
+                <li><a href="/realestate.html" class="nav-link">Estimator</a></li>
+                <li><a href="/contact.html" class="nav-link nav-cta">Contact</a></li>
+            </ul>
+            
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </button>
+            
+            <button class="navbar-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero -->
+        <section class="projects-hero">
+            <div class="container">
+                <h1>EE Projects</h1>
+                <p>High-speed digital design, signal integrity, power integrity, and electrical engineering projects.</p>
+            </div>
+        </section>
+
+        <!-- Projects Grid -->
+        <section class="projects-section">
+            <div class="container">
+                <div class="projects-grid">
+                    
+                    <!-- Clock Distribution H-Tree Network -->
+                    <article class="project-card reveal" id="ee443-clock-h-tree">
+                        <div class="project-card-image">
+                            <span class="placeholder-icon">⏱️</span>
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-card-header">
+                                <h3 class="project-card-title">Clock Distribution Network (H-Tree) in ADS</h3>
+                                <span class="project-card-category">High-Speed Digital</span>
+                            </div>
+                            <p class="project-card-description">
+                                Designed and analyzed a hierarchical H-tree clock distribution network for synchronous digital systems using Advanced Design System (ADS). 
+                                The design addresses clock skew minimization, power distribution optimization, and signal integrity 
+                                across large-scale integrated circuits. Implemented balanced routing topologies to ensure uniform 
+                                clock arrival times at all synchronous elements while maintaining low power consumption and minimal 
+                                jitter across process variations.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>Designed hierarchical H-tree topology for balanced clock distribution</li>
+                                <li>Analyzed clock skew and jitter across process corners</li>
+                                <li>Optimized power distribution network for clock tree</li>
+                                <li>Evaluated signal integrity and timing closure requirements</li>
+                                <li>Characterized performance under PVT variations</li>
+                                <li>Validated design through SPICE-level simulations</li>
+                            </ul>
+                            <div class="project-card-tags">
+                                <span class="tag tag-primary">Clock Distribution</span>
+                                <span class="tag">Signal Integrity</span>
+                                <span class="tag">IC Design</span>
+                                <span class="tag">Timing Analysis</span>
+                                <span class="tag">ADS</span>
+                            </div>
+                            <div class="project-card-actions">
+                                <a href="/projects/ee/reports/ee443-clock-distribution-h-tree.pdf" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
+                                    Download Full Report (PDF)
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- High-Speed PCB Signal & Power Integrity Analysis -->
+                    <article class="project-card reveal" id="ee443-pcb-si-pi">
+                        <div class="project-card-image">
+                            <span class="placeholder-icon">📡</span>
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-card-header">
+                                <h3 class="project-card-title">High-Speed PCB Signal & Power Integrity (500 MHz PRBS)</h3>
+                                <span class="project-card-category">High-Speed Digital</span>
+                            </div>
+                            <p class="project-card-description">
+                                Conducted comprehensive signal integrity (SI) and power integrity (PI) analysis for a high-speed 
+                                printed circuit board operating at 500 MHz with pseudorandom binary sequence (PRBS) signaling. The analysis covered transmission line design, 
+                                impedance matching, power delivery network optimization, and electromagnetic compatibility. 
+                                Designed controlled-impedance traces, optimized power plane layouts, and validated performance 
+                                through frequency-domain and time-domain simulations to ensure reliable operation at target speeds.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>Designed controlled-impedance transmission lines for 500 MHz operation</li>
+                                <li>Optimized power delivery network (PDN) for low impedance across frequency</li>
+                                <li>Analyzed signal integrity metrics including eye diagrams and jitter</li>
+                                <li>Evaluated power integrity through impedance analysis and voltage drop calculations</li>
+                                <li>Performed electromagnetic compatibility (EMC) analysis and mitigation</li>
+                                <li>Validated design through S-parameter and transient simulations</li>
+                            </ul>
+                            <div class="project-card-tags">
+                                <span class="tag tag-primary">PCB Design</span>
+                                <span class="tag">Signal Integrity</span>
+                                <span class="tag">Power Integrity</span>
+                                <span class="tag">EMC Analysis</span>
+                                <span class="tag">PRBS</span>
+                            </div>
+                            <div class="project-card-actions">
+                                <a href="/projects/ee/reports/ee443-high-speed-pcb-si-pi-500mhz.pdf" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
+                                    Download Full Report (PDF)
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Clock Distribution Network CDN H-Tree - Design & Simulation -->
+                    <article class="project-card reveal" id="cdn-h-tree">
+                        <div class="project-card-image">
+                            <span class="placeholder-icon">🔌</span>
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-card-header">
+                                <h3 class="project-card-title">Clock Distribution Network (CDN) H-Tree – Design & Simulation</h3>
+                                <span class="project-card-category">High-Speed Digital</span>
+                            </div>
+                            <p class="project-card-description">
+                                Developed a comprehensive clock distribution network design methodology using H-tree topologies for high-performance integrated circuits. 
+                                The project focused on creating scalable clock distribution architectures that minimize skew, reduce power consumption, and maintain signal integrity 
+                                across process, voltage, and temperature variations. Implemented advanced simulation workflows to validate timing closure and power efficiency.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>Designed scalable H-tree clock distribution architectures</li>
+                                <li>Developed simulation workflows for timing and power analysis</li>
+                                <li>Optimized clock tree synthesis for minimal skew and power</li>
+                                <li>Characterized performance across PVT corners</li>
+                                <li>Validated signal integrity and timing closure requirements</li>
+                            </ul>
+                            <div class="project-card-tags">
+                                <span class="tag tag-primary">Clock Distribution</span>
+                                <span class="tag">IC Design</span>
+                                <span class="tag">Timing Analysis</span>
+                                <span class="tag">Power Optimization</span>
+                            </div>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <h3>Ryan Greene</h3>
+                    <p>Computer Engineering student passionate about building scalable systems and intelligent automation.</p>
+                    <div class="footer-social">
+                        <a href="https://github.com/ryangreene9000" target="_blank" rel="noopener" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ryancgreene1" target="_blank" rel="noopener" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="mailto:Ryangreene2091@gmail.com" aria-label="Email">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about.html">About</a></li>
+                        <li><a href="/projects.html">Projects</a></li>
+                        <li><a href="/games.html">Games</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/games/minesweeper/">Minesweeper</a></li>
+                        <li><a href="/games/tetris/">Tetris</a></li>
+                        <li><a href="/games/snake/">Snake</a></li>
+                        <li><a href="/realestate.html">ML Estimator</a></li>
+                        <li><a href="/projects/cs-ce/#mips">MIPS Processor</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:Ryangreene2091@gmail.com">Email</a></li>
+                        <li><a href="https://www.linkedin.com/in/ryancgreene1" target="_blank">LinkedIn</a></li>
+                        <li><a href="https://github.com/ryangreene9000" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 Ryan Greene — All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/scripts/main.js"></script>
+</body>
+</html>

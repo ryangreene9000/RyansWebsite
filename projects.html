@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Projects by Ryan Greene - AI systems, embedded programming, data engineering, and digital design.">
+    <meta name="description" content="Projects by Ryan Greene - CS/CE and EE engineering projects.">
     <title>Projects | Ryan Greene</title>
     
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <link rel="stylesheet" href="/styles/global.css">
     
     <style>
-        /* Projects Page Specific Styles */
+        /* Projects Landing Page Styles */
         .projects-hero {
             padding: var(--space-4xl) 0 var(--space-2xl);
             text-align: center;
@@ -26,7 +26,7 @@
             margin: 0 auto;
         }
         
-        .filter-tabs {
+        .category-tabs {
             display: flex;
             justify-content: center;
             gap: var(--space-sm);
@@ -34,234 +34,78 @@
             flex-wrap: wrap;
         }
         
-        .filter-tab {
-            padding: 0.625rem 1.25rem;
+        .category-tab {
+            padding: 0.875rem 2rem;
             border-radius: var(--radius-full);
-            font-size: 0.9375rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             color: var(--color-text-muted);
             background: var(--color-bg-card);
-            border: 1px solid var(--color-border-light);
+            border: 2px solid var(--color-border-light);
             cursor: pointer;
             transition: var(--transition-fast);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
         }
         
-        .filter-tab:hover {
-            border-color: var(--color-border);
+        .category-tab:hover {
+            border-color: var(--color-primary);
             color: var(--color-text);
+            transform: translateY(-2px);
         }
         
-        .filter-tab.active {
+        .category-tab.active {
             background: var(--color-text);
             color: var(--color-bg);
             border-color: var(--color-text);
         }
         
-        .projects-section {
+        .projects-overview {
             padding: var(--space-3xl) 0;
         }
         
-        .projects-grid {
+        .overview-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: var(--space-xl);
-            align-items: start;
+            margin-top: var(--space-2xl);
         }
         
-        .project-card {
+        .overview-card {
             background: var(--color-bg-card);
             border-radius: var(--radius-lg);
             border: 1px solid var(--color-border-light);
-            overflow: hidden;
+            padding: var(--space-2xl);
+            text-align: center;
             transition: var(--transition-base);
         }
         
-        .project-card:hover {
+        .overview-card:hover {
             border-color: transparent;
             box-shadow: var(--shadow-xl);
-            transform: translateY(-6px);
+            transform: translateY(-4px);
         }
         
-        .project-card-image {
-            aspect-ratio: 16 / 9;
-            background: linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-border-light) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .project-card-image .placeholder-icon {
-            font-size: 3.5rem;
-            opacity: 0.6;
-        }
-        
-        .project-card-image::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent 0%, rgba(13, 148, 136, 0.05) 100%);
-        }
-        
-        .project-card-content {
-            padding: var(--space-xl);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .project-card-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: var(--space-md);
+        .overview-card-icon {
+            font-size: 3rem;
             margin-bottom: var(--space-md);
         }
         
-        .project-card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--color-text);
-        }
-        
-        .project-card-category {
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-radius: var(--radius-full);
-            white-space: nowrap;
-        }
-        
-        .category-ai {
-            background: rgba(139, 92, 246, 0.1);
-            color: #8b5cf6;
-        }
-        
-        .category-systems {
-            background: rgba(13, 148, 136, 0.1);
-            color: var(--color-primary);
-        }
-        
-        .category-embedded {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--color-accent);
-        }
-        
-        .category-digital {
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-        }
-        
-        .category-ml {
-            background: rgba(236, 72, 153, 0.1);
-            color: #ec4899;
-        }
-        
-        .category-game {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-        }
-        
-        .category-cloud {
-            background: rgba(249, 115, 22, 0.1);
-            color: #f97316;
-        }
-        
-        .category-iot {
-            background: rgba(6, 182, 212, 0.1);
-            color: #06b6d4;
-        }
-        
-        .project-card-description {
-            font-size: 0.9375rem;
-            color: var(--color-text-muted);
-            line-height: 1.7;
-            margin-bottom: var(--space-md);
-        }
-        
-        .project-card-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-xs);
-            margin-top: auto;
-        }
-        
-        .project-highlights {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 var(--space-md) 0;
-            font-size: 0.85rem;
-        }
-        
-        .project-highlights li {
-            position: relative;
-            padding-left: 1.25rem;
-            margin-bottom: 0.375rem;
-            color: var(--color-text-muted);
-        }
-        
-        .project-highlights li::before {
-            content: "•";
-            position: absolute;
-            left: 0;
-            color: var(--color-primary);
-            font-weight: bold;
-        }
-        
-        .project-card-actions {
-            display: flex;
-            gap: var(--space-sm);
-            margin-top: var(--space-md);
-        }
-        
-        .project-card-actions .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        /* Featured Project (larger card) */
-        .project-card.featured {
-            grid-column: span 2;
-        }
-        
-        .project-card.featured .project-card-image {
-            aspect-ratio: 21 / 9;
-        }
-        
-        .project-card.featured .project-card-title {
+        .overview-card h2 {
             font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
         }
         
-        @media (max-width: 1024px) {
-            .projects-grid {
+        .overview-card p {
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-lg);
+        }
+        
+        @media (max-width: 768px) {
+            .overview-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .project-card.featured {
-                grid-column: span 1;
-            }
-            
-            .project-card.featured .project-card-image {
-                aspect-ratio: 16 / 9;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .filter-tabs {
-                justify-content: flex-start;
-                overflow-x: auto;
-                padding-bottom: var(--space-sm);
-            }
-            
-            .filter-tab {
-                flex-shrink: 0;
-            }
-            
-            .project-card-actions {
-                flex-direction: column;
             }
         }
     </style>
@@ -309,434 +153,40 @@
         <section class="projects-hero">
             <div class="container">
                 <h1>Projects</h1>
-                <p>A collection of my work spanning AI, systems programming, embedded systems, and digital design.</p>
+                <p>A collection of my engineering work spanning computer science, computer engineering, and electrical engineering.</p>
                 
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-filter="all">All Projects</button>
-                    <button class="filter-tab" data-filter="ai">AI / ML</button>
-                    <button class="filter-tab" data-filter="cloud">Cloud</button>
-                    <button class="filter-tab" data-filter="systems">Systems</button>
-                    <button class="filter-tab" data-filter="embedded">Embedded</button>
-                    <button class="filter-tab" data-filter="digital">Digital Design</button>
+                <div class="category-tabs">
+                    <a href="/projects/cs-ce/" class="category-tab">
+                        CS / CE Projects
+                    </a>
+                    <a href="/projects/ee/" class="category-tab">
+                        EE Projects
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- Projects Grid -->
-        <section class="projects-section">
+        <!-- Overview -->
+        <section class="projects-overview">
             <div class="container">
-                <div class="projects-grid">
+                <div class="overview-grid">
+                    <div class="overview-card reveal">
+                        <div class="overview-card-icon">💻</div>
+                        <h2>CS / CE Projects</h2>
+                        <p>Software systems, embedded programming, AI/ML, cloud infrastructure, and computer engineering projects.</p>
+                        <a href="/projects/cs-ce/" class="btn btn-primary">
+                            View CS / CE Projects
+                        </a>
+                    </div>
                     
-                    <!-- Apple CarPlay / Raspberry Pi Infotainment System -->
-                    <article class="project-card featured reveal" id="carplay-pi" data-category="embedded">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">🚗</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Apple CarPlay / Raspberry Pi Infotainment System</h3>
-                                <span class="project-card-category category-iot">Embedded / IoT</span>
-                            </div>
-                            <p class="project-card-description">
-                                A custom Raspberry Pi 5–based infotainment system featuring a CarPlay-style touchscreen 
-                                interface, Bluetooth audio streaming, and navigation capabilities. Built with Python and 
-                                Flask, this embedded project brings modern smartphone integration to vehicles without 
-                                native CarPlay support.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">Raspberry Pi 5</span>
-                                <span class="tag">Python</span>
-                                <span class="tag">Flask</span>
-                                <span class="tag">Touchscreen</span>
-                                <span class="tag">Bluetooth</span>
-                                <span class="tag">Sense HAT</span>
-                            </div>
-                            <div class="project-card-actions">
-                                <a href="/carplay.html" class="btn btn-primary btn-sm">
-                                    View Project
-                                </a>
-                                <a href="https://github.com/ryangreene9000/carplay-pi" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                                    </svg>
-                                    View Code
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- AI Contract Detection System -->
-                    <article class="project-card featured reveal" id="ai-contract" data-category="ai">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">🤖</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">AI-Powered Contract Change Detection Pipeline</h3>
-                                <span class="project-card-category category-ai">AI / Cloud</span>
-                            </div>
-                            <p class="project-card-description">
-                                <strong>🏆 1st Place — FINRA 2025 Creatathon</strong><br><br>
-                                A serverless NLP pipeline that analyzes regulatory contracts, detects semantic changes, 
-                                and automates compliance workflows. The system uses multi-stage Lambdas orchestrated by 
-                                Step Functions, stores metadata in DynamoDB, and leverages OpenAI embeddings for semantic 
-                                diffing. Features text extraction, contract change classification, and asynchronous 
-                                pipeline execution with error recovery. <strong>Reduced manual review by 80%</strong>.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">AWS Lambda</span>
-                                <span class="tag">Step Functions</span>
-                                <span class="tag">DynamoDB</span>
-                                <span class="tag">S3</span>
-                                <span class="tag">Python</span>
-                                <span class="tag tag-accent">OpenAI Embeddings</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Minesweeper -->
-                    <article class="project-card reveal" id="minesweeper" data-category="systems">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">💣</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Minesweeper — C++ / WebAssembly</h3>
-                                <span class="project-card-category category-game">Game</span>
-                            </div>
-                            <p class="project-card-description">
-                                Full Minesweeper clone built from scratch in modern C++ using SFML. Features 
-                                randomized board generation, neighbor-count algorithm, recursive flood-fill reveal, 
-                                flagging system, and win/loss detection. Compiled to WebAssembly for browser play.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">C++</span>
-                                <span class="tag">SFML</span>
-                                <span class="tag">WebAssembly</span>
-                                <span class="tag">Emscripten</span>
-                            </div>
-                            <div class="project-card-actions">
-                                <a href="/games/minesweeper/" class="btn btn-primary btn-sm">
-                                    Play Now
-                                </a>
-                                <a href="https://github.com/ryangreene9000" class="btn btn-secondary btn-sm" target="_blank">
-                                    View Code
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Housing Price Estimator -->
-                    <article class="project-card reveal" id="ml-estimator" data-category="ai">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">🏠</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Housing Price Estimator</h3>
-                                <span class="project-card-category category-ml">ML / API</span>
-                            </div>
-                            <p class="project-card-description">
-                                Machine learning API that predicts housing prices based on property features. 
-                                Built with scikit-learn using a KNN regression model, deployed as a Flask REST 
-                                API on Render with a responsive web interface.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">Python</span>
-                                <span class="tag">Flask</span>
-                                <span class="tag">scikit-learn</span>
-                                <span class="tag">REST API</span>
-                            </div>
-                            <div class="project-card-actions">
-                                <a href="/realestate.html" class="btn btn-primary btn-sm">
-                                    Try It
-                                </a>
-                                <a href="https://github.com/ryangreene9000" class="btn btn-secondary btn-sm" target="_blank">
-                                    View Code
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- MIPS Processor -->
-                    <article class="project-card reveal" id="mips" data-category="digital">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">⚙️</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Pipelined 32-bit CPU in Verilog</h3>
-                                <span class="project-card-category category-digital">Hardware</span>
-                            </div>
-                            <p class="project-card-description">
-                                A fully synthesizable 5-stage pipelined CPU implementing a subset of MIPS with 
-                                hazard detection, data forwarding, and branch handling. Designed and implemented 
-                                IF/ID/EX/MEM/WB pipeline stages, ALU, register file, control unit, and forwarding 
-                                logic. Features instruction-level parallelism with proper pipeline state handling.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">Verilog</span>
-                                <span class="tag">Vivado</span>
-                                <span class="tag">FPGA</span>
-                                <span class="tag">CPU Design</span>
-                                <span class="tag">Digital Logic</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Clock Distribution H-Tree Network -->
-                    <article class="project-card reveal" id="ee443-clock-h-tree" data-category="digital">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">⏱️</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Clock Distribution H-Tree Network</h3>
-                                <span class="project-card-category category-digital">High-Speed Digital</span>
-                            </div>
-                            <p class="project-card-description">
-                                Designed and analyzed a hierarchical H-tree clock distribution network for synchronous digital systems. 
-                                The design addresses clock skew minimization, power distribution optimization, and signal integrity 
-                                across large-scale integrated circuits. Implemented balanced routing topologies to ensure uniform 
-                                clock arrival times at all synchronous elements while maintaining low power consumption and minimal 
-                                jitter across process variations.
-                            </p>
-                            <ul class="project-highlights">
-                                <li>Designed hierarchical H-tree topology for balanced clock distribution</li>
-                                <li>Analyzed clock skew and jitter across process corners</li>
-                                <li>Optimized power distribution network for clock tree</li>
-                                <li>Evaluated signal integrity and timing closure requirements</li>
-                                <li>Characterized performance under PVT variations</li>
-                                <li>Validated design through SPICE-level simulations</li>
-                            </ul>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">Clock Distribution</span>
-                                <span class="tag">Signal Integrity</span>
-                                <span class="tag">IC Design</span>
-                                <span class="tag">Timing Analysis</span>
-                            </div>
-                            <div class="project-card-actions">
-                                <a href="/projects/ee443/reports/ee443-clock-distribution-h-tree.pdf" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
-                                    Download Full Report (PDF)
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- High-Speed PCB Signal & Power Integrity Analysis -->
-                    <article class="project-card reveal" id="ee443-pcb-si-pi" data-category="digital">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">📡</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">High-Speed PCB Signal & Power Integrity Analysis</h3>
-                                <span class="project-card-category category-digital">High-Speed Digital</span>
-                            </div>
-                            <p class="project-card-description">
-                                Conducted comprehensive signal integrity (SI) and power integrity (PI) analysis for a high-speed 
-                                printed circuit board operating at 500 MHz. The analysis covered transmission line design, 
-                                impedance matching, power delivery network optimization, and electromagnetic compatibility. 
-                                Designed controlled-impedance traces, optimized power plane layouts, and validated performance 
-                                through frequency-domain and time-domain simulations to ensure reliable operation at target speeds.
-                            </p>
-                            <ul class="project-highlights">
-                                <li>Designed controlled-impedance transmission lines for 500 MHz operation</li>
-                                <li>Optimized power delivery network (PDN) for low impedance across frequency</li>
-                                <li>Analyzed signal integrity metrics including eye diagrams and jitter</li>
-                                <li>Evaluated power integrity through impedance analysis and voltage drop calculations</li>
-                                <li>Performed electromagnetic compatibility (EMC) analysis and mitigation</li>
-                                <li>Validated design through S-parameter and transient simulations</li>
-                            </ul>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">PCB Design</span>
-                                <span class="tag">Signal Integrity</span>
-                                <span class="tag">Power Integrity</span>
-                                <span class="tag">EMC Analysis</span>
-                            </div>
-                            <div class="project-card-actions">
-                                <a href="/projects/ee443/reports/ee443-high-speed-pcb-si-pi-500mhz.pdf" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
-                                    Download Full Report (PDF)
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- HCS12 Embedded Systems -->
-                    <article class="project-card reveal" id="hcs12" data-category="embedded">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">📟</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Real-Time Embedded Systems on HCS12</h3>
-                                <span class="project-card-category category-embedded">Embedded</span>
-                            </div>
-                            <p class="project-card-description">
-                                A collection of embedded programs for the HCS12 microcontroller including real-time 
-                                audio sampling at 8kHz, waveform synthesis, 7-segment display drivers, timer interrupts, 
-                                and UART-driven command interfaces. Implemented deterministic timing guarantees with 
-                                optimized ISR latencies using RTI interrupts and ADC.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">HCS12</span>
-                                <span class="tag">Assembly</span>
-                                <span class="tag">Timers</span>
-                                <span class="tag">RTI Interrupts</span>
-                                <span class="tag">ADC</span>
-                                <span class="tag">UART</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Custom Memory Allocator (Malloc Lab) -->
-                    <article class="project-card reveal" id="malloc-lab" data-category="systems">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">🧠</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Custom Memory Allocator (Malloc Lab)</h3>
-                                <span class="project-card-category category-systems">Systems</span>
-                            </div>
-                            <p class="project-card-description">
-                                Built a custom dynamic memory allocator in C featuring segmented free lists and a slab 
-                                allocator design. Implemented block splitting, coalescing, boundary tags, and alignment 
-                                optimizations to achieve strong throughput and utilization performance. Designed the 
-                                allocator to minimize fragmentation, reduce allocation time, and maintain a robust 
-                                internal heap-checker for debugging and validation.
-                            </p>
-                            <ul class="project-highlights">
-                                <li>Implemented segmented free lists for fast allocation based on size classes</li>
-                                <li>Added a slab allocator for small, fixed-size frequent allocations</li>
-                                <li>Designed coalescing and block-splitting logic to reduce fragmentation</li>
-                                <li>Integrated boundary tags and a heap consistency checker</li>
-                                <li>Tuned for balanced throughput and memory utilization</li>
-                            </ul>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">C</span>
-                                <span class="tag">Systems Programming</span>
-                                <span class="tag">Memory Management</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Threaded Channel Synchronization System -->
-                    <article class="project-card reveal" id="thread-channels" data-category="systems">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">🔗</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Threaded Channel Synchronization System</h3>
-                                <span class="project-card-category category-systems">Systems</span>
-                            </div>
-                            <p class="project-card-description">
-                                Built a concurrency-safe messaging system in C featuring thread-safe channels with 
-                                blocking and non-blocking semantics. Implemented synchronization using mutexes, 
-                                condition variables, and semaphore-based wakeups. Designed a CSP-style channel 
-                                abstraction supporting multiple producers and consumers with FIFO ordering, deadlock 
-                                prevention, and deterministic selection via a select() API. Ensured safe closure 
-                                behavior, correct wakeups, and robust memory cleanup across concurrent workflows.
-                            </p>
-                            <ul class="project-highlights">
-                                <li>Implemented blocking and non-blocking send/receive operations with mutex-protected queues</li>
-                                <li>Designed a FIFO message buffer supporting concurrent producers and consumers</li>
-                                <li>Added a semaphore-based notification system powering a scalable select() mechanism</li>
-                                <li>Ensured safe shutdown semantics that wake all blocked threads on channel close</li>
-                                <li>Built deterministic selection logic for multi-channel operations</li>
-                                <li>Implemented robust memory management and thread-safe cleanup guarantees</li>
-                            </ul>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">C</span>
-                                <span class="tag">pthreads</span>
-                                <span class="tag">Mutexes</span>
-                                <span class="tag">Condition Variables</span>
-                                <span class="tag">Concurrency</span>
-                                <span class="tag">Systems Programming</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- AWS Valve Automation System -->
-                    <article class="project-card reveal" id="valve-automation" data-category="cloud">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">☁️</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">AWS Serverless Valve Automation System</h3>
-                                <span class="project-card-category category-cloud">Cloud</span>
-                            </div>
-                            <p class="project-card-description">
-                                A distributed AWS-based automation system for monitoring and validating utility 
-                                valve states in real time. Designed for WSSC Water to monitor valve operations, 
-                                validate field data, and trigger automated workflows. Features operational 
-                                workflow automation, email notifications, audit logging, and backend integrations.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">Java</span>
-                                <span class="tag">AWS Lambda</span>
-                                <span class="tag">EC2</span>
-                                <span class="tag">DynamoDB</span>
-                                <span class="tag">Step Functions</span>
-                                <span class="tag">S3</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Raspberry Pi Sensor Dashboard -->
-                    <article class="project-card reveal" id="rpi-dashboard" data-category="embedded">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">🍓</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">Raspberry Pi Networked Sensor Dashboard</h3>
-                                <span class="project-card-category category-iot">IoT</span>
-                            </div>
-                            <p class="project-card-description">
-                                A Python-based sensor visualization system on Raspberry Pi with real-time dashboard, 
-                                joystick control, LED matrix output, and TCP/IP communication. Visualizes accelerometer, 
-                                temperature, and humidity data in real time. Features remote monitoring and socket 
-                                communication between devices.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">Python</span>
-                                <span class="tag">Raspberry Pi</span>
-                                <span class="tag">Tkinter</span>
-                                <span class="tag">SenseHAT</span>
-                                <span class="tag">TCP Sockets</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- CPU Design Space Exploration -->
-                    <article class="project-card reveal" id="simplescalar" data-category="digital">
-                        <div class="project-card-image">
-                            <span class="placeholder-icon">📊</span>
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-card-header">
-                                <h3 class="project-card-title">CPU Microarchitecture Design-Space Exploration</h3>
-                                <span class="project-card-category category-digital">Hardware</span>
-                            </div>
-                            <p class="project-card-description">
-                                A parametric performance study of CPU microarchitecture exploring 18 tuning knobs 
-                                including fetch width, ALU count, cache parameters, and branch predictors. Automated 
-                                simulation experiments in SimpleScalar across hundreds of configurations. Evaluated 
-                                performance, energy, and EDP metrics to find optimal design points.
-                            </p>
-                            <div class="project-card-tags">
-                                <span class="tag tag-primary">C++</span>
-                                <span class="tag">SimpleScalar</span>
-                                <span class="tag">Shell Scripting</span>
-                                <span class="tag">Performance Analysis</span>
-                                <span class="tag">CPU Design</span>
-                            </div>
-                        </div>
-                    </article>
-
+                    <div class="overview-card reveal">
+                        <div class="overview-card-icon">⚡</div>
+                        <h2>EE Projects</h2>
+                        <p>High-speed digital design, signal integrity, power integrity, and electrical engineering projects.</p>
+                        <a href="/projects/ee/" class="btn btn-primary">
+                            View EE Projects
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -786,7 +236,7 @@
                         <li><a href="/games/tetris/">Tetris</a></li>
                         <li><a href="/games/snake/">Snake</a></li>
                         <li><a href="/realestate.html">ML Estimator</a></li>
-                        <li><a href="/projects.html#mips">MIPS Processor</a></li>
+                        <li><a href="/projects/cs-ce/#mips">MIPS Processor</a></li>
                     </ul>
                 </div>
                 
@@ -796,7 +246,6 @@
                         <li><a href="mailto:Ryangreene2091@gmail.com">Email</a></li>
                         <li><a href="https://www.linkedin.com/in/ryancgreene1" target="_blank">LinkedIn</a></li>
                         <li><a href="https://github.com/ryangreene9000" target="_blank">GitHub</a></li>
-                        <!-- Phone number removed for privacy reasons -->
                     </ul>
                 </div>
             </div>
@@ -808,34 +257,5 @@
     </footer>
 
     <script src="/scripts/main.js"></script>
-    <script>
-        // Project filtering functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterTabs = document.querySelectorAll('.filter-tab');
-            const projectCards = document.querySelectorAll('.project-card');
-            
-            filterTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const filter = this.dataset.filter;
-                    
-                    // Update active tab
-                    filterTabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Filter projects
-                    projectCards.forEach(card => {
-                        const category = card.dataset.category;
-                        if (filter === 'all' || category === filter) {
-                            card.style.display = '';
-                            card.classList.add('revealed');
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                });
-            });
-        });
-    </script>
 </body>
 </html>
-
